@@ -50,6 +50,9 @@ class SimulateRequest(BaseModel):
     hot_spot_sigma: float = Field(4.0, gt=0, description="Radio/dispersión de la perturbación en celdas")
     boundary_type: Literal["dirichlet", "periodic"] = Field("dirichlet", description="Condición de frontera")
     enforce_stability: bool = Field(True, description="Si es True, rechaza pasos de tiempo inestables con error 400")
+    initial_grid: list[list[float]] | None = Field(
+        None, description="Matriz 2D inicial personalizada opcional (ej. de estaciones reales)"
+    )
 
     @model_validator(mode="after")
     def validate_cfl_stability(self) -> SimulateRequest:

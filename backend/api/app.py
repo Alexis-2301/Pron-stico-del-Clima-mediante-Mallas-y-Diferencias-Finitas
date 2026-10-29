@@ -10,7 +10,7 @@ from backend.api.schemas import (
     SimulateResponse,
     StabilityResponse,
 )
-from backend.core.grid import create_hotspot_grid
+from backend.core.grid import Grid, create_hotspot_grid
 from backend.core.simulator import run_simulation
 from backend.core.stability import check_stability
 
@@ -71,16 +71,27 @@ def post_simulate(params: SimulateRequest) -> SimulateResponse:
     try:
         dy_val = params.dy if params.dy is not None else params.dx
 
-        grid = create_hotspot_grid(
-            ny=params.ny,
-            nx=params.nx,
-            base_temp=params.base_temp,
-            hot_spot_temp=params.hot_spot_temp,
-            sigma=params.hot_spot_sigma,
-            dx=params.dx,
-            dy=dy_val,
-            boundary_type=params.boundary_type,
-        )
+        if params.initial_grid is not None:
+            arr = np.array(params.initial_grid, dtype=np.float64)
+            grid = Grid(
+                ny=arr.shape[0],
+                nx=arr.shape[1],
+                dx=params.dx,
+                dy=dy_val,
+                boundary_type=params.boundary_type,
+                T=arr,
+            )
+        else:
+            grid = create_hotspot_grid(
+                ny=params.ny,
+                nx=params.nx,
+                base_temp=params.base_temp,
+                hot_spot_temp=params.hot_spot_temp,
+                sigma=params.hot_spot_sigma,
+                dx=params.dx,
+                dy=dy_val,
+                boundary_type=params.boundary_type,
+            )
 
         sim_res = run_simulation(
             grid=grid,

@@ -1,36 +1,37 @@
-import React from 'react';
-import { Sliders, Wind, Flame, Grid3X3, Server, Laptop } from 'lucide-react';
+import React, { useState } from 'react';
+import { Sliders, Wind, Flame, Grid3X3, Server, Laptop, Globe, Satellite, Sparkles, RefreshCw } from 'lucide-react';
+import { REAL_REGIONS } from '../services/realWeather';
 
 const PRESETS = [
   {
     id: 'base',
     name: 'Caso Base',
     desc: 'Condiciones estándar estables (10 min, 5 m/s)',
-    params: { dt: 600, u: 5, v: 0, alpha: 5000, ny: 50, nx: 50 },
+    params: { dt: 600, u: 5, v: 0, alpha: 5000, ny: 40, nx: 40 },
   },
   {
     id: 'front',
     name: 'Frente Frío',
     desc: 'Viento fuerte diagonal (15 m/s Este, 10 m/s Norte)',
-    params: { dt: 300, u: 15, v: 10, alpha: 5000, ny: 50, nx: 50 },
+    params: { dt: 300, u: 15, v: 10, alpha: 5000, ny: 40, nx: 40 },
   },
   {
     id: 'diffusion',
     name: 'Difusión Pura',
     desc: 'Sin viento, disipación isotrópica',
-    params: { dt: 600, u: 0, v: 0, alpha: 12000, ny: 50, nx: 50 },
+    params: { dt: 600, u: 0, v: 0, alpha: 12000, ny: 40, nx: 40 },
   },
   {
     id: 'limit',
     name: 'Límite Estable',
     desc: 'Casi en el umbral C+4r ≈ 0.95',
-    params: { dt: 1300, u: 5, v: 0, alpha: 5000, ny: 50, nx: 50 },
+    params: { dt: 1300, u: 5, v: 0, alpha: 5000, ny: 40, nx: 40 },
   },
   {
     id: 'unstable',
     name: 'Inestable (Demo Divergencia)',
     desc: 'Δt = 1 h (3600 s), CFL violado: divergencia garantizada',
-    params: { dt: 3600, u: 5, v: 0, alpha: 5000, ny: 50, nx: 50 },
+    params: { dt: 3600, u: 5, v: 0, alpha: 5000, ny: 40, nx: 40 },
   },
 ];
 
@@ -47,9 +48,15 @@ export default function Controls({
   onToggleWind,
   onRunSimulation,
   isCalculating,
+  onLoadRealWeather,
+  isLoadingRealWeather,
+  realWeatherInfo,
+  onClearRealWeather,
 }) {
+  const [selectedRegion, setSelectedRegion] = useState('llanos');
+
   return (
-    <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-4 shadow-xl backdrop-blur-md space-y-5">
+    <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-4 shadow-xl backdrop-blur-md space-y-4">
       {/* Selector de modo Backend vs Local */}
       <div className="flex items-center justify-between border-b border-slate-800 pb-3">
         <div className="flex items-center gap-2">
@@ -66,17 +73,91 @@ export default function Controls({
                 : 'border-amber-500/40 bg-amber-950/40 text-amber-300'
               : 'border-sky-500/40 bg-sky-950/40 text-sky-300'
           }`}
-          title="Alternar entre cálculo en el servidor FastAPI o motor Web Assembly / JS en el cliente"
+          title="Alternar entre servidor FastAPI o motor local en el navegador"
         >
           {useBackend ? <Server className="h-3.5 w-3.5" /> : <Laptop className="h-3.5 w-3.5" />}
           <span>{useBackend ? (backendOnline ? 'API FastAPI' : 'API Desconectada') : 'Motor Local'}</span>
         </button>
       </div>
 
-      {/* Escenarios preestablecidos */}
+      {/* SECCIÓN DESTACADA: CLIMA REAL EN VIVO (OPEN-METEO) */}
+      <div className="rounded-xl border border-emerald-500/30 bg-emerald-950/20 p-3.5 space-y-2.5">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2 text-xs font-bold text-emerald-400">
+            <Satellite className="h-4 w-4" />
+            <span>Datos Reales en Vivo (Open-Meteo)</span>
+          </div>
+          {realWeatherInfo && (
+            <span className="flex items-center gap-1 text-[10px] font-mono text-emerald-300 bg-emerald-500/20 px-2 py-0.5 rounded-full">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-ping"></span>
+              Conectado
+            </span>
+          )}
+        </div>
+
+        <p className="text-[11px] text-slate-300 leading-relaxed">
+          Alimenta la malla con mediciones satelitales en tiempo real de temperatura y viento de estaciones oficiales:
+        </p>
+
+        <div className="flex flex-col gap-2">
+          <select
+            value={selectedRegion}
+            onChange={(e) => setSelectedRegion(e.target.value)}
+            className="w-full rounded-lg border border-slate-700 bg-slate-900 px-2.5 py-1.5 text-xs text-slate-200 focus:border-emerald-400 focus:outline-none font-mono"
+          >
+            {REAL_REGIONS.map((r) => (
+              <option key={r.id} value={r.id}>
+                {r.name}
+              </option>
+            ))}
+          </select>
+
+          <div className="flex gap-2">
+            <button
+              onClick={() => onLoadRealWeather && onLoadRealWeather(selectedRegion)}
+              disabled={isLoadingRealWeather}
+              className="flex-1 flex items-center justify-center gap-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-2 text-xs transition shadow-md shadow-emerald-500/20 disabled:opacity-50"
+            >
+              <Globe className="h-3.5 w-3.5" />
+              {isLoadingRealWeather ? 'Descargando mediciones...' : 'Cargar Clima Real en Vivo'}
+            </button>
+
+            {realWeatherInfo && (
+              <button
+                onClick={onClearRealWeather}
+                className="px-2.5 py-2 rounded-lg border border-slate-700 bg-slate-800 text-slate-400 hover:text-white text-xs font-mono transition"
+                title="Volver a simulación sintética"
+              >
+                <RefreshCw className="h-3.5 w-3.5" />
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Resumen de estaciones conectadas */}
+        {realWeatherInfo && realWeatherInfo.stations && (
+          <div className="border-t border-emerald-500/20 pt-2 space-y-1">
+            <span className="block text-[10px] font-mono text-slate-400 uppercase">
+              Estaciones reales en la malla:
+            </span>
+            <div className="grid grid-cols-2 gap-1 text-[10px] font-mono text-slate-300">
+              {realWeatherInfo.stations.map((st) => (
+                <div key={st.name} className="truncate bg-slate-900/60 p-1 rounded border border-slate-800">
+                  <span className="text-slate-400">{st.name.split(' ')[0]}:</span>{' '}
+                  <span className="font-bold text-amber-300">{st.weather.temp.toFixed(1)}°C</span>{' '}
+                  <span className="text-sky-300">({st.weather.humidity}%)</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Escenarios preestablecidos sintéticos */}
       <div>
-        <label className="block text-xs font-mono text-slate-400 mb-2 uppercase tracking-wider">
-          Escenarios Típicos
+        <label className="block text-xs font-mono text-slate-400 mb-2 uppercase tracking-wider flex items-center gap-1.5">
+          <Sparkles className="h-3.5 w-3.5 text-amber-400" />
+          <span>O prueba estos escenarios didácticos:</span>
         </label>
         <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-3">
           {PRESETS.map((preset) => (
@@ -143,11 +224,6 @@ export default function Controls({
             onChange={(e) => onChangeParam('dt', Number(e.target.value))}
             className="w-full accent-amber-500 cursor-pointer"
           />
-          <div className="flex justify-between text-[10px] font-mono text-slate-500">
-            <span>30 s</span>
-            <span>600 s (10 min)</span>
-            <span>3600 s (1 h)</span>
-          </div>
         </div>
 
         {/* Viento u (Este-Oeste) */}

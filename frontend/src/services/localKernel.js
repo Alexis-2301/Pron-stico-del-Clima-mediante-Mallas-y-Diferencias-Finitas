@@ -1,6 +1,6 @@
 /**
  * Motor numérico en JavaScript puro para ejecución local / offline en el navegador.
- * Implementa exactamente el mismo algoritmo FTCS + Upwind del backend.
+ * Modela el trío meteorológico del PDF: Temperatura (T), Presión (P) y Humedad (H).
  */
 
 export function calculateDtMax(alpha, u, v, dx) {
@@ -40,50 +40,87 @@ export function simulateLocal(params) {
     nx = 40,
     dx = 10000,
     alpha = 5000,
-    u = 5,
-    v = 0,
-    dt = 600,
+    u = 8,
+    v = 3,
+    dt = 450,
     total_time = 86400,
     save_interval = 600,
-    base_temp = 20,
-    hot_spot_temp = 35,
-    hot_spot_sigma = 4,
+    base_temp = 18,
+    hot_spot_temp = 36,
+    hot_spot_sigma = 4.5,
     boundary_type = 'dirichlet',
   } = params;
 
   const tStart = performance.now();
   const stability = checkLocalStability(alpha, u, v, dx, dt);
 
-  // Crear matriz inicial con foco gaussiano
+  // 1. Inicializar Temperatura T
   const ci = Math.floor(ny / 2);
   const cj = Math.floor(nx / 2);
   let T = new Float64Array(ny * nx);
+  let H = new Float64Array(ny * nx); // Humedad (%)
+  let P = new Float64Array(ny * nx); // Presión (hPa)
+
   const deltaT = hot_spot_temp - base_temp;
 
-  for (let i = 0; i < ny; i++) {
-    for (let j = 0; j < nx; j++) {
-      const distSq = (i - ci) ** 2 + (j - cj) ** 2;
-      const g = deltaT * Math.exp(-distSq / (2 * hot_spot_sigma * hot_spot_sigma));
-      T[i * nx + j] = base_temp + g;
+  if (params.initialT && params.initialT.length === ny && params.initialT[0].length === nx) {
+    for (let i = 0; i < ny; i++) {
+      for (let j = 0; j < nx; j++) {
+        const idx = i * nx + j;
+        T[idx] = params.initialT[i][j];
+        H[idx] = params.initialH ? params.initialH[i][j] : 65;
+        P[idx] = params.initialP ? params.initialP[i][j] : 1013;
+      }
+    }
+  } else {
+    for (let i = 0; i < ny; i++) {
+      for (let j = 0; j < nx; j++) {
+        const idx = i * nx + j;
+        const distSq = (i - ci) ** 2 + (j - cj) ** 2;
+        const g = deltaT * Math.exp(-distSq / (2 * hot_spot_sigma * hot_spot_sigma));
+        T[idx] = base_temp + g;
+
+        // Humedad: el núcleo caliente es más seco (45-55%), mientras que en la periferia y este hay un frente húmedo (75-88%)
+        const humidFront = Math.sin((j / nx) * Math.PI) * 25 + Math.cos((i / ny) * Math.PI) * 10;
+        H[idx] = Math.max(35, Math.min(95, 65 + humidFront - g * 0.9));
+
+        // Presión: baja térmica en el centro caliente (1007 hPa), alta en la periferia (1016 hPa)
+        P[idx] = 1014.0 - g * 0.25;
+      }
     }
   }
 
-  // Guardar bordes Dirichlet originales
-  const fixed = new Float64Array(T);
+  // Copias de bordes fijos
+  const fixedT = new Float64Array(T);
+  const fixedH = new Float64Array(H);
+  const fixedP = new Float64Array(P);
 
   const snapshots = [];
+  const humiditySnapshots = [];
+  const pressureSnapshots = [];
   const timestamps = [];
 
   function captureSnapshot(timeSec) {
-    const matrix = [];
+    const matT = [];
+    const matH = [];
+    const matP = [];
     for (let i = 0; i < ny; i++) {
-      const row = [];
+      const rowT = [];
+      const rowH = [];
+      const rowP = [];
       for (let j = 0; j < nx; j++) {
-        row.push(T[i * nx + j]);
+        const idx = i * nx + j;
+        rowT.push(T[idx]);
+        rowH.push(H[idx]);
+        rowP.push(P[idx]);
       }
-      matrix.push(row);
+      matT.push(rowT);
+      matH.push(rowH);
+      matP.push(rowP);
     }
-    snapshots.push(matrix);
+    snapshots.push(matT);
+    humiditySnapshots.push(matH);
+    pressureSnapshots.push(matP);
     timestamps.push(timeSec);
   }
 
@@ -92,63 +129,67 @@ export function simulateLocal(params) {
   let currentTime = 0;
   let nextSave = save_interval;
   let steps = 0;
+
   let TNext = new Float64Array(T);
+  let HNext = new Float64Array(H);
+  let PNext = new Float64Array(P);
 
-  const rx = (alpha * dt) / (dx * dx);
-  const cx = (u * dt) / dx;
-  const cy = (v * dt) / dx;
+  function stepField(cur, nxt, fixed, fieldAlpha, fieldDt) {
+    const rCurrent = (fieldAlpha * fieldDt) / (dx * dx);
+    const cxCurrent = (u * fieldDt) / dx;
+    const cyCurrent = (v * fieldDt) / dx;
 
-  while (currentTime < total_time - 1e-6) {
-    const stepDt = Math.min(dt, total_time - currentTime);
-    const rCurrent = (alpha * stepDt) / (dx * dx);
-    const cxCurrent = (u * stepDt) / dx;
-    const cyCurrent = (v * stepDt) / dx;
-
-    // FTCS + Upwind interno
     for (let i = 1; i < ny - 1; i++) {
       const row = i * nx;
       for (let j = 1; j < nx - 1; j++) {
         const p = row + j;
-        const Tc = T[p];
-        const Tn = T[p + nx];
-        const Ts = T[p - nx];
-        const Te = T[p + 1];
-        const Tw = T[p - 1];
+        const c = cur[p];
+        const n = cur[p + nx];
+        const s = cur[p - nx];
+        const e = cur[p + 1];
+        const w = cur[p - 1];
 
-        const diff = rCurrent * (Tn + Ts + Te + Tw - 4 * Tc);
-        const advX = u > 0 ? -cxCurrent * (Tc - Tw) : -cxCurrent * (Te - Tc);
-        const advY = v > 0 ? -cyCurrent * (Tc - Ts) : -cyCurrent * (Tn - Tc);
+        const diff = rCurrent * (n + s + e + w - 4 * c);
+        const advX = u > 0 ? -cxCurrent * (c - w) : -cxCurrent * (e - c);
+        const advY = v > 0 ? -cyCurrent * (c - s) : -cyCurrent * (n - c);
 
-        TNext[p] = Tc + diff + advX + advY;
+        nxt[p] = c + diff + advX + advY;
       }
     }
 
-    // Fronteras
     if (boundary_type === 'dirichlet') {
       for (let j = 0; j < nx; j++) {
-        TNext[j] = fixed[j]; // Sur
-        TNext[(ny - 1) * nx + j] = fixed[(ny - 1) * nx + j]; // Norte
+        nxt[j] = fixed[j];
+        nxt[(ny - 1) * nx + j] = fixed[(ny - 1) * nx + j];
       }
       for (let i = 0; i < ny; i++) {
-        TNext[i * nx] = fixed[i * nx]; // Oeste
-        TNext[i * nx + nx - 1] = fixed[i * nx + nx - 1]; // Este
+        nxt[i * nx] = fixed[i * nx];
+        nxt[i * nx + nx - 1] = fixed[i * nx + nx - 1];
       }
     } else {
-      // Periódica
       for (let j = 1; j < nx - 1; j++) {
-        TNext[j] = TNext[(ny - 2) * nx + j];
-        TNext[(ny - 1) * nx + j] = TNext[nx + j];
+        nxt[j] = nxt[(ny - 2) * nx + j];
+        nxt[(ny - 1) * nx + j] = nxt[nx + j];
       }
       for (let i = 1; i < ny - 1; i++) {
-        TNext[i * nx] = TNext[i * nx + nx - 2];
-        TNext[i * nx + nx - 1] = TNext[i * nx + 1];
+        nxt[i * nx] = nxt[i * nx + nx - 2];
+        nxt[i * nx + nx - 1] = nxt[i * nx + 1];
       }
     }
+  }
 
-    // Intercambiar buffers
-    const temp = T;
-    T = TNext;
-    TNext = temp;
+  while (currentTime < total_time - 1e-6) {
+    const stepDt = Math.min(dt, total_time - currentTime);
+
+    // Avanzar Temperatura, Humedad y Presión con el mismo esquema
+    stepField(T, TNext, fixedT, alpha, stepDt);
+    stepField(H, HNext, fixedH, alpha * 0.7, stepDt); // La humedad se difunde ligeramente más lento
+    stepField(P, PNext, fixedP, alpha * 1.2, stepDt);
+
+    // Intercambio de buffers
+    let tmp = T; T = TNext; TNext = tmp;
+    tmp = H; H = HNext; HNext = tmp;
+    tmp = P; P = PNext; PNext = tmp;
 
     currentTime += stepDt;
     steps++;
@@ -161,26 +202,10 @@ export function simulateLocal(params) {
 
   const elapsed = (performance.now() - tStart) / 1000;
 
-  // Estadísticas globales
-  const stats = { min: [], max: [], mean: [] };
-  for (const snap of snapshots) {
-    let sMin = Infinity, sMax = -Infinity, sum = 0;
-    const totalNodes = ny * nx;
-    for (let i = 0; i < ny; i++) {
-      for (let j = 0; j < nx; j++) {
-        const val = snap[i][j];
-        if (val < sMin) sMin = val;
-        if (val > sMax) sMax = val;
-        sum += val;
-      }
-    }
-    stats.min.push(sMin);
-    stats.max.push(sMax);
-    stats.mean.push(sum / totalNodes);
-  }
-
   return {
     snapshots,
+    humiditySnapshots,
+    pressureSnapshots,
     timestamps,
     dt,
     total_time,
@@ -188,7 +213,6 @@ export function simulateLocal(params) {
     computation_time_seconds: elapsed,
     stability,
     grid_shape: [ny, nx],
-    stats,
     metadata: { alpha, u, v, dx, boundary_type },
   };
 }

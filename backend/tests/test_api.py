@@ -123,3 +123,32 @@ def test_post_simulate_allows_unstable_when_disabled():
     assert response.status_code == 200
     data = response.json()
     assert data["stability"]["is_stable"] is False
+
+
+def test_post_simulate_with_custom_initial_grid():
+    """Verifica que POST /simulate acepte una matriz inicial personalizada (datos reales)."""
+    custom_matrix = [
+        [20.0, 21.0, 22.0, 23.0, 24.0],
+        [21.0, 25.0, 28.0, 26.0, 23.0],
+        [20.0, 24.0, 32.0, 25.0, 22.0],
+        [19.0, 22.0, 24.0, 22.0, 21.0],
+        [18.0, 19.0, 20.0, 20.0, 19.0],
+    ]
+    payload = {
+        "ny": 5,
+        "nx": 5,
+        "dx": 10000.0,
+        "alpha": 5000.0,
+        "u": 2.0,
+        "v": 1.0,
+        "dt": 600.0,
+        "total_time": 1200.0,
+        "save_interval": 600.0,
+        "initial_grid": custom_matrix,
+    }
+
+    response = client.post("/simulate", json=payload)
+    assert response.status_code == 200
+    data = response.json()
+    assert data["grid_shape"] == [5, 5]
+    assert data["snapshots"][0][2][2] == pytest.approx(32.0)
