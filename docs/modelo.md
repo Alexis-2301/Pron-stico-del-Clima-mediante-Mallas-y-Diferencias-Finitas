@@ -214,8 +214,8 @@ Malla de 5 × 5 con el nodo central `(2, 2) = 100` y el resto en `0`, salvo que 
 
 ## 8. Checklist de la Fase 1
 
-- [ ] Ecuación gobernante definida.
-- [ ] Discretización con índices y esquema upwind documentada.
-- [ ] Condición de estabilidad y $\Delta t_{max}$ definidos.
-- [ ] Parámetros y supuestos escritos.
-- [ ] Casos A a E verificados a mano (o en hoja de cálculo).
+- [x] Ecuación gobernante definida.
+- [x] Discretización con índices y esquema upwind documentada.
+- [x] Condición de estabilidad y $\Delta t_{max}$ definidos.
+- [x] Parámetros y supuestos escritos.
+- [x] Casos A a E verificados a mano (o en hoja de cálculo).
