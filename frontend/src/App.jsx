@@ -7,6 +7,9 @@ import StabilityBadge from './components/StabilityBadge';
 import Inspector from './components/Inspector';
 import ConvergenceGraph from './components/ConvergenceGraph';
 import WeatherForecastCard from './components/WeatherForecastCard';
+import HourlyStrip from './components/HourlyStrip';
+import ForecastChart from './components/ForecastChart';
+import Suggestions from './components/Suggestions';
 import { Collapsible } from './components/Collapsible';
 import { ThemeToggle } from './context/ThemeContext';
 import { simulateLocal, checkLocalStability, calculateDtMax } from './services/localKernel';
@@ -17,15 +20,12 @@ import {
   Flame,
   Wind,
   Info,
-  CheckCircle2,
-  AlertTriangle,
   GraduationCap,
   Sparkles,
   Layers,
   Box,
   HelpCircle,
   Satellite,
-  Clock,
   Settings,
   BarChart3,
 } from 'lucide-react';
@@ -186,329 +186,261 @@ export default function App() {
   const hourDisplay = String(Math.floor(currentTimeSec / 3600)).padStart(2, '0');
   const minDisplay = String(Math.floor((currentTimeSec % 3600) / 60)).padStart(2, '0');
 
+  const timeLabel = `${hourDisplay}:${minDisplay}`;
+  const minVal = realWeatherInfo ? Math.floor(realWeatherInfo.minT) - 2 : 12;
+  const maxVal = realWeatherInfo ? Math.ceil(realWeatherInfo.maxT) + 3 : 38;
+  const snapshots = simulation ? simulation.snapshots : [];
+  const timestamps = simulation ? simulation.timestamps : [];
+  const humiditySnapshots = simulation ? simulation.humiditySnapshots : [];
+  const pressureSnapshots = simulation ? simulation.pressureSnapshots : [];
+
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 p-6 lg:p-8 transition-colors duration-300">
-      <ThemeToggle />
-
-      <div className="max-w-6xl mx-auto space-y-8">
-        {/* ENCABEZADO */}
-        <div className="clay-panel">
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-            <div className="flex-1">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="p-2 rounded-lg bg-red-100 dark:bg-red-900/30">
-                  <CloudSun className="h-6 w-6 text-red-600" />
-                </div>
-                <span className="text-sm font-bold uppercase tracking-wider llanos-red-text">Simulador 3D</span>
-              </div>
-              <h1 className="text-4xl lg:text-4xl font-bold mb-2 llanos-red-text">Pronóstico de Clima</h1>
-              <p className="text-lg text-slate-600 dark:text-slate-400 font-medium">
-                Métodos numéricos avanzados con ecuación de advección-difusión
-              </p>
-            </div>
-
-            {/* Selector de Modo */}
-            <div className="flex rounded-xl glass-panel-sm p-1 self-start lg:self-center">
-              <button
-                onClick={() => setActiveTab('simple')}
-                className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold transition ${
-                  activeTab === 'simple'
-                    ? 'gradient-llanos text-white shadow-md'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
-                }`}
-              >
-                <Sparkles className="h-4 w-4" />
-                Intuitivo
-              </button>
-              <button
-                onClick={() => setActiveTab('tecnico')}
-                className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold transition ${
-                  activeTab === 'tecnico'
-                    ? 'gradient-llanos text-white shadow-md'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
-                }`}
-              >
-                <GraduationCap className="h-4 w-4" />
-                Técnico
-              </button>
+    <div className="min-h-screen px-3 pb-10 pt-3 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-[1320px] space-y-5 sm:space-y-6">
+        {/* CABECERA */}
+        <header className="glass sticky top-3 z-30 flex items-center justify-between gap-3 rounded-clay px-4 py-3 sm:px-5">
+          <div className="flex min-w-0 items-center gap-3">
+            <span className="clay-active grid h-11 w-11 shrink-0 place-items-center rounded-2xl">
+              <CloudSun className="h-6 w-6" aria-hidden="true" />
+            </span>
+            <div className="min-w-0">
+              <h1 className="truncate text-xl font-bold leading-tight text-ink sm:text-2xl">Clima-App</h1>
+              <p className="truncate text-xs text-mute">Universidad de los Llanos · Pronóstico con diferencias finitas</p>
             </div>
           </div>
-        </div>
 
-        {/* BANNER ESTADO */}
-        {realWeatherInfo ? (
-          <div className="clay-panel card-gradient-green border-l-4">
-            <div className="flex items-center gap-4">
-              <Satellite className="h-8 w-8 text-green-600 animate-pulse flex-shrink-0" />
-              <div className="flex-1">
-                <h3 className="font-bold text-lg text-green-700 dark:text-green-400">Modo Clima Real</h3>
-                <p className="text-sm text-slate-600 dark:text-slate-300">
-                  Datos de {realWeatherInfo.regionName} · Viento: {realWeatherInfo.avgU}m/s E, {realWeatherInfo.avgV}m/s N
-                </p>
-              </div>
-              <button onClick={handleClearRealWeather} className="clay-button text-sm whitespace-nowrap">
-                Modo Didáctico
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="seg" role="group" aria-label="Modo de la interfaz">
+              <button type="button" className="seg-item" aria-pressed={activeTab === 'simple'} onClick={() => setActiveTab('simple')}>
+                <Sparkles className="h-4 w-4" aria-hidden="true" />
+                <span className="hidden sm:inline">Intuitivo</span>
+              </button>
+              <button type="button" className="seg-item" aria-pressed={activeTab === 'tecnico'} onClick={() => setActiveTab('tecnico')}>
+                <GraduationCap className="h-4 w-4" aria-hidden="true" />
+                <span className="hidden sm:inline">Técnico</span>
               </button>
             </div>
+            <ThemeToggle />
+          </div>
+        </header>
+
+        {/* ESTADO: clima real o modo didáctico */}
+        {realWeatherInfo ? (
+          <div className="glass flex flex-wrap items-center justify-between gap-3 rounded-clay-sm px-4 py-3">
+            <div className="flex items-center gap-3 text-sm">
+              <span className="icon-chip !h-9 !w-9 text-emerald-600 dark:text-emerald-400">
+                <Satellite className="h-4 w-4" aria-hidden="true" />
+              </span>
+              <p className="text-mute">
+                <strong className="font-semibold text-ink">Clima real activo:</strong> {realWeatherInfo.regionName}. Viento medido{' '}
+                {realWeatherInfo.avgU} m/s Este, {realWeatherInfo.avgV} m/s Norte.
+              </p>
+            </div>
+            <button type="button" onClick={handleClearRealWeather} className="btn-soft">
+              Volver al modo didáctico
+            </button>
           </div>
         ) : (
-          <div className="clay-panel card-gradient-blue border-l-4">
-            <div className="flex items-start lg:items-center gap-4 flex-col lg:flex-row">
-              <Info className="h-8 w-8 text-blue-600 dark:text-blue-400 flex-shrink-0" />
-              <div className="flex-1">
-                <h3 className="font-bold text-lg text-blue-700 dark:text-blue-400">Modo Didáctico</h3>
-                <p className="text-sm text-slate-600 dark:text-slate-300">
-                  Simula frentes atmosféricos con montaña caliente. Lluvia se activa cuando humedad &gt; 70%
-                </p>
-              </div>
-              <div className="flex gap-2 flex-shrink-0">
-                <button
-                  onClick={() => setViewMode('3d')}
-                  className={`px-3 py-2 rounded-lg text-sm font-bold transition ${
-                    viewMode === '3d' ? 'gradient-llanos text-white' : 'bg-slate-200 dark:bg-slate-700'
-                  }`}
-                >
-                  <Box className="h-4 w-4 inline mr-1" /> 3D
-                </button>
-                <button
-                  onClick={() => setViewMode('2d')}
-                  className={`px-3 py-2 rounded-lg text-sm font-bold transition ${
-                    viewMode === '2d' ? 'gradient-llanos text-white' : 'bg-slate-200 dark:bg-slate-700'
-                  }`}
-                >
-                  <Layers className="h-4 w-4 inline mr-1" /> 2D
-                </button>
-              </div>
-            </div>
+          <div className="glass flex items-center gap-3 rounded-clay-sm px-4 py-3 text-sm">
+            <span className="icon-chip !h-9 !w-9">
+              <Info className="h-4 w-4" aria-hidden="true" />
+            </span>
+            <p className="text-mute">
+              <strong className="font-semibold text-ink">Modo didáctico:</strong> una montaña cálida de {params.hot_spot_temp} °C se mueve con el viento. Cuando
+              la humedad supera 70 %, empieza a llover en la vista 3D.
+            </p>
           </div>
         )}
 
-        {/* GRID PRINCIPAL */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* COLUMNA 1-2: Visualizador */}
-          <div className="lg:col-span-2 space-y-8">
-            {/* Visualizador */}
-            <div className="clay-panel card-gradient-purple">
-              <div className="flex items-center gap-3 mb-4">
-                <Box className="h-6 w-6 text-purple-600" />
-                <h2 className="text-2xl font-bold">Visualizador</h2>
-                <span className="ml-auto text-sm font-mono bg-slate-200 dark:bg-slate-700 px-3 py-1 rounded">
-                  {hourDisplay}:{minDisplay}
-                </span>
-              </div>
-              <div className="h-96 bg-slate-900 rounded-xl overflow-hidden">
-                {viewMode === '3d' ? (
-                  <ThreeViewer
-                    matrix={currentMatrix}
-                    selectedNode={selectedNode}
-                    onSelectNode={setSelectedNode}
-                    u={params.u}
-                    v={params.v}
-                    minVal={realWeatherInfo ? Math.floor(realWeatherInfo.minT) - 2 : 12}
-                    maxVal={realWeatherInfo ? Math.ceil(realWeatherInfo.maxT) + 3 : 38}
-                    showGrid={showGrid}
-                    showWind={showWind}
-                    showRain={currentNodeHum >= 70}
-                    reliefHeight={2.8}
-                  />
-                ) : (
-                  <Heatmap
-                    matrix={currentMatrix}
-                    selectedNode={selectedNode}
-                    onSelectNode={setSelectedNode}
-                    u={params.u}
-                    v={params.v}
-                    minVal={realWeatherInfo ? Math.floor(realWeatherInfo.minT) - 2 : 12}
-                    maxVal={realWeatherInfo ? Math.ceil(realWeatherInfo.maxT) + 3 : 38}
-                    showGrid={showGrid}
-                    showWind={showWind}
-                  />
-                )}
-              </div>
-            </div>
-
-            {/* Línea de Tiempo */}
-            <div className="clay-panel card-gradient-blue">
-              <div className="flex items-center gap-3 mb-4">
-                <Clock className="h-6 w-6 text-blue-600" />
-                <h2 className="text-2xl font-bold">Línea de Tiempo</h2>
-                <span className="ml-auto text-sm font-semibold llanos-red-text">
-                  {currentStep} / {simulation ? simulation.snapshots.length : 0}
-                </span>
-              </div>
-              <TimeControls
-                isPlaying={isPlaying}
-                onTogglePlay={() => setIsPlaying(!isPlaying)}
-                onStep={() => setCurrentStep((prev) => Math.min(simulation.snapshots.length - 1, prev + 1))}
-                onReset={() => { setIsPlaying(false); setCurrentStep(0); }}
-                currentIndex={currentStep}
-                totalSnapshots={simulation ? simulation.snapshots.length : 1}
-                timestamps={simulation ? simulation.timestamps : []}
-                speed={speed}
-                onChangeSpeed={setSpeed}
-                onSeek={setCurrentStep}
-              />
-            </div>
+        {/* FILA 1: tiempo actual + mapa térmico */}
+        <main className="grid grid-cols-1 items-stretch gap-5 sm:gap-6 lg:grid-cols-12">
+          <div className="lg:col-span-5">
+            <WeatherForecastCard
+              temp={currentNodeTemp}
+              humidity={currentNodeHum}
+              pressure={currentNodePres}
+              windSpeed={windMagnitude}
+              currentTimeSec={currentTimeSec}
+              selectedNode={selectedNode}
+            />
           </div>
 
-          {/* COLUMNA 3: Panel Derecho */}
-          <div className="space-y-8">
-            {/* Pronóstico */}
-            <div className="clay-panel card-gradient-orange">
-              <div className="flex items-center gap-3 mb-4">
-                <CloudSun className="h-6 w-6 text-orange-600" />
-                <h2 className="text-xl font-bold">Pronóstico</h2>
+          <section className="clay flex flex-col p-4 sm:p-5 lg:col-span-7" aria-label="Mapa térmico">
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-3 px-1">
+              <div>
+                <h2 className="text-xl font-semibold text-ink">Mapa térmico</h2>
+                <p className="text-xs text-mute">Temperatura de la malla a las {timeLabel}</p>
               </div>
-              <WeatherForecastCard
-                temp={currentNodeTemp}
-                humidity={currentNodeHum}
-                pressure={currentNodePres}
-                windSpeed={windMagnitude}
-                currentTimeSec={currentTimeSec}
-                onJumpToTime={setCurrentStep}
-                snapshots={simulation ? simulation.snapshots : []}
-                humiditySnapshots={simulation ? simulation.humiditySnapshots : []}
-                pressureSnapshots={simulation ? simulation.pressureSnapshots : []}
-                timestamps={simulation ? simulation.timestamps : []}
-                selectedNode={selectedNode}
-              />
-            </div>
-
-            {/* Estabilidad */}
-            <div className={`clay-panel ${liveStability.is_stable ? 'card-gradient-green' : 'card-gradient-red'}`}>
-              <div className="flex items-center gap-3 mb-4">
-                {liveStability.is_stable ? (
-                  <CheckCircle2 className="h-6 w-6 text-green-600" />
-                ) : (
-                  <AlertTriangle className="h-6 w-6 text-red-600" />
-                )}
-                <h2 className="text-xl font-bold">
-                  {liveStability.is_stable ? 'Estable' : 'Inestable'}
-                </h2>
-              </div>
-              <p className="text-sm mb-4">
-                {liveStability.is_stable ? (
-                  <>Paso {Math.round(params.dt / 60)} min sin errores</>
-                ) : (
-                  <>Paso muy grande - Máximo: {Math.floor(liveStability.dt_max)}s</>
-                )}
-              </p>
-              {!liveStability.is_stable && (
-                <button onClick={handleAutoFitDt} className="clay-button w-full text-sm">
-                  Auto-corregir
+              <div className="seg" role="group" aria-label="Tipo de vista">
+                <button type="button" className="seg-item" aria-pressed={viewMode === '3d'} onClick={() => setViewMode('3d')}>
+                  <Box className="h-4 w-4" aria-hidden="true" />
+                  3D
                 </button>
-              )}
+                <button type="button" className="seg-item" aria-pressed={viewMode === '2d'} onClick={() => setViewMode('2d')}>
+                  <Layers className="h-4 w-4" aria-hidden="true" />
+                  2D
+                </button>
+              </div>
             </div>
 
-            {/* Configuración */}
-            <Collapsible
-              title="Configuración"
-              icon={Settings}
-              defaultOpen={openPanels.config}
-              onToggle={(isOpen) => setOpenPanels({...openPanels, config: isOpen})}
-            >
-              <div className="clay-panel card-gradient-orange mt-4">
-                <Controls
-                  params={params}
-                  onChangeParam={handleParamChange}
-                  onApplyPreset={handleApplyPreset}
-                  backendOnline={backendOnline}
-                  useBackend={useBackend}
-                  onToggleUseBackend={() => setUseBackend(!useBackend)}
-                  showGrid={showGrid}
-                  onToggleGrid={setShowGrid}
-                  showWind={showWind}
-                  onToggleWind={setShowWind}
-                  onRunSimulation={() => executeSimulation(params)}
-                  isCalculating={isCalculating}
-                  onLoadRealWeather={handleLoadRealWeather}
-                  isLoadingRealWeather={isLoadingRealWeather}
-                  realWeatherInfo={realWeatherInfo}
-                  onClearRealWeather={handleClearRealWeather}
-                />
-              </div>
-            </Collapsible>
-          </div>
-        </div>
-
-        {/* SECCIÓN INFERIOR - MODO TÉCNICO */}
-        {activeTab === 'tecnico' && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 pt-8 border-t border-slate-300 dark:border-slate-700">
-            <Collapsible
-              title="Inspector del Nodo"
-              icon={Box}
-              defaultOpen={openPanels.inspector}
-              onToggle={(isOpen) => setOpenPanels({...openPanels, inspector: isOpen})}
-            >
-              <div className="clay-panel card-gradient-blue mt-4">
-                <Inspector
+            <div className="flex-1">
+              {viewMode === '3d' ? (
+                <ThreeViewer
                   matrix={currentMatrix}
                   selectedNode={selectedNode}
-                  alpha={params.alpha}
+                  onSelectNode={setSelectedNode}
                   u={params.u}
                   v={params.v}
-                  dx={params.dx}
-                  dt={params.dt}
+                  minVal={minVal}
+                  maxVal={maxVal}
+                  showGrid={showGrid}
+                  showWind={showWind}
+                  showRain={currentNodeHum >= 70}
+                  reliefHeight={2.8}
                 />
-              </div>
-            </Collapsible>
+              ) : (
+                <Heatmap
+                  matrix={currentMatrix}
+                  selectedNode={selectedNode}
+                  onSelectNode={setSelectedNode}
+                  u={params.u}
+                  v={params.v}
+                  minVal={minVal}
+                  maxVal={maxVal}
+                  showGrid={showGrid}
+                  showWind={showWind}
+                />
+              )}
+            </div>
+          </section>
 
+          {/* FILA 2: línea de tiempo */}
+          <div className="lg:col-span-12">
+            <TimeControls
+              isPlaying={isPlaying}
+              onTogglePlay={() => setIsPlaying(!isPlaying)}
+              onStep={() => setCurrentStep((prev) => Math.min(snapshots.length - 1, prev + 1))}
+              onReset={() => {
+                setIsPlaying(false);
+                setCurrentStep(0);
+              }}
+              currentIndex={currentStep}
+              totalSnapshots={simulation ? snapshots.length : 1}
+              timestamps={timestamps}
+              speed={speed}
+              onChangeSpeed={setSpeed}
+              onSeek={setCurrentStep}
+            />
+          </div>
+
+          {/* FILA 3: tira de 24 horas */}
+          <div className="lg:col-span-12">
+            <HourlyStrip
+              snapshots={snapshots}
+              humiditySnapshots={humiditySnapshots}
+              pressureSnapshots={pressureSnapshots}
+              timestamps={timestamps}
+              selectedNode={selectedNode}
+              windSpeed={windMagnitude}
+              currentSec={currentTimeSec}
+              onSeek={setCurrentStep}
+            />
+          </div>
+
+          {/* FILA 4: gráfica + sugerencias y estabilidad */}
+          <div className="lg:col-span-8">
+            <ForecastChart
+              snapshots={snapshots}
+              humiditySnapshots={humiditySnapshots}
+              pressureSnapshots={pressureSnapshots}
+              timestamps={timestamps}
+              selectedNode={selectedNode}
+              windSpeed={windMagnitude}
+              currentStep={currentStep}
+              onSeek={setCurrentStep}
+            />
+          </div>
+          <div className="space-y-5 sm:space-y-6 lg:col-span-4">
+            <Suggestions temp={currentNodeTemp} humidity={currentNodeHum} pressure={currentNodePres} windSpeed={windMagnitude} />
+            <StabilityBadge stability={liveStability} onAutoFitDt={handleAutoFitDt} />
+          </div>
+
+          {/* FILA 5: configuración */}
+          <div className="lg:col-span-12">
             <Collapsible
-              title="Evolución en 24 Horas"
-              icon={BarChart3}
-              defaultOpen={openPanels.convergence}
-              onToggle={(isOpen) => setOpenPanels({...openPanels, convergence: isOpen})}
+              title="Configuración física"
+              icon={Settings}
+              defaultOpen={openPanels.config}
+              onToggle={(isOpen) => setOpenPanels({ ...openPanels, config: isOpen })}
             >
-              <div className="clay-panel card-gradient-purple mt-4">
-                <ConvergenceGraph
-                  nodeHistory={nodeHistory}
-                  timestamps={simulation ? simulation.timestamps : []}
-                  gridH={params.dx / 1000}
-                />
-              </div>
+              <Controls
+                params={params}
+                onChangeParam={handleParamChange}
+                onApplyPreset={handleApplyPreset}
+                backendOnline={backendOnline}
+                useBackend={useBackend}
+                onToggleUseBackend={() => setUseBackend(!useBackend)}
+                showGrid={showGrid}
+                onToggleGrid={setShowGrid}
+                showWind={showWind}
+                onToggleWind={setShowWind}
+                onRunSimulation={() => executeSimulation(params)}
+                isCalculating={isCalculating}
+                onLoadRealWeather={handleLoadRealWeather}
+                isLoadingRealWeather={isLoadingRealWeather}
+                realWeatherInfo={realWeatherInfo}
+                onClearRealWeather={handleClearRealWeather}
+              />
             </Collapsible>
           </div>
-        )}
 
-        {/* MODO INTUITIVO */}
-        {activeTab === 'simple' && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-8">
-            <div className="clay-panel card-gradient-red">
-              <div className="flex items-center gap-3 mb-3">
-                <Flame className="h-6 w-6 text-red-600" />
-                <h3 className="text-lg font-bold">Temperatura</h3>
+          {/* MODO TÉCNICO */}
+          {activeTab === 'tecnico' && (
+            <>
+              <div className="lg:col-span-5">
+                <Collapsible
+                  title="Inspector del nodo"
+                  icon={Box}
+                  defaultOpen={openPanels.inspector}
+                  onToggle={(isOpen) => setOpenPanels({ ...openPanels, inspector: isOpen })}
+                >
+                  <Inspector matrix={currentMatrix} selectedNode={selectedNode} alpha={params.alpha} u={params.u} v={params.v} dx={params.dx} dt={params.dt} />
+                </Collapsible>
               </div>
-              <p className="text-sm text-slate-600 dark:text-slate-300">
-                Difusión térmica que reparte el calor entre nodos vecinos buscando equilibrio
-              </p>
-            </div>
+              <div className="lg:col-span-7">
+                <Collapsible
+                  title="Evolución y costo computacional"
+                  icon={BarChart3}
+                  defaultOpen={openPanels.convergence}
+                  onToggle={(isOpen) => setOpenPanels({ ...openPanels, convergence: isOpen })}
+                >
+                  <ConvergenceGraph nodeHistory={nodeHistory} timestamps={timestamps} gridH={params.dx / 1000} />
+                </Collapsible>
+              </div>
+            </>
+          )}
 
-            <div className="clay-panel card-gradient-orange">
-              <div className="flex items-center gap-3 mb-3">
-                <Wind className="h-6 w-6 text-orange-600" />
-                <h3 className="text-lg font-bold">Viento y Presión</h3>
-              </div>
-              <p className="text-sm text-slate-600 dark:text-slate-300">
-                Advección que transporta masas de aire. La baja presión crea inestabilidad
-              </p>
-            </div>
-
-            <div className="clay-panel card-gradient-green">
-              <div className="flex items-center gap-3 mb-3">
-                <HelpCircle className="h-6 w-6 text-green-600" />
-                <h3 className="text-lg font-bold">Humedad y Lluvia</h3>
-              </div>
-              <p className="text-sm text-slate-600 dark:text-slate-300">
-                Condensación cuando humedad &gt; 70%. Se activa lluvia en 3D automáticamente
-              </p>
-            </div>
-          </div>
-        )}
+          {/* MODO INTUITIVO */}
+          {activeTab === 'simple' &&
+            [
+              { Icon: Flame, title: 'Temperatura', text: 'La difusión térmica reparte el calor entre nodos vecinos hasta buscar equilibrio.' },
+              { Icon: Wind, title: 'Viento y presión', text: 'La advección transporta masas de aire. Una presión baja favorece la inestabilidad.' },
+              { Icon: HelpCircle, title: 'Humedad y lluvia', text: 'Con humedad sobre 70 % se condensa el vapor y la lluvia aparece en el mapa 3D.' },
+            ].map(({ Icon, title, text }) => (
+              <article key={title} className="clay p-5 sm:p-6 lg:col-span-4">
+                <span className="icon-chip mb-3">
+                  <Icon size={18} aria-hidden="true" />
+                </span>
+                <h3 className="mb-1.5 text-lg font-semibold text-ink">{title}</h3>
+                <p className="text-sm leading-relaxed text-mute">{text}</p>
+              </article>
+            ))}
+        </main>
 
         {/* PIE DE PÁGINA */}
-        <footer className="border-t border-slate-300 dark:border-slate-700 pt-8 pb-4 text-center text-sm text-slate-600 dark:text-slate-400 font-medium">
-          <p>Universidad de Los Llanos · Pronóstico del Clima mediante Mallas y Diferencias Finitas</p>
-          <p className="text-xs mt-2">Julian Esteban Romero Guzmán · Eduar Alexis Murcia Rodríguez</p>
+        <footer className="px-2 pb-2 pt-4 text-center text-sm text-mute">
+          <p>Universidad de los Llanos · Pronóstico del clima mediante mallas y diferencias finitas</p>
+          <p className="mt-1 text-xs text-faint">Julian Esteban Romero Guzmán · Eduar Alexis Murcia Rodríguez</p>
         </footer>
       </div>
     </div>

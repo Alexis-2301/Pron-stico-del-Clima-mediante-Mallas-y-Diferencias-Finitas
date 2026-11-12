@@ -1,4 +1,5 @@
 import React, { useRef, useEffect } from 'react';
+import ThermalLegend from './ThermalLegend';
 
 /**
  * Paleta de colores térmica: Azul -> Cyan -> Amarillo -> Naranja -> Rojo
@@ -152,12 +153,15 @@ export default function Heatmap({
 
         // Nodo central
         const centerRenderY = (ny - 1 - i) * cellH;
-        ctx.strokeStyle = '#fbbf24';
+        ctx.strokeStyle = 'rgba(0, 0, 0, 0.45)';
+        ctx.lineWidth = 6;
+        ctx.strokeRect(j * cellW, centerRenderY, cellW, cellH);
+        ctx.strokeStyle = '#ffffff';
         ctx.lineWidth = 3;
         ctx.strokeRect(j * cellW, centerRenderY, cellW, cellH);
 
         // Cruz conectora
-        ctx.strokeStyle = 'rgba(251, 191, 36, 0.7)';
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.85)';
         ctx.lineWidth = 1.5;
         const cX = j * cellW + cellW / 2;
         const cY = centerRenderY + cellH / 2;
@@ -197,34 +201,29 @@ export default function Heatmap({
   };
 
   return (
-    <div className="relative rounded-xl border border-slate-800 bg-slate-900/80 p-3 shadow-xl backdrop-blur-md">
-      <div className="flex items-center justify-between pb-2 text-xs font-mono text-slate-400">
-        <span>Norte ↑ (y) · Este → (x)</span>
-        <span>Clic en un nodo para inspeccionar stencil</span>
+    <div className="flex h-full flex-col gap-3">
+      <div className="stage relative flex items-center justify-center p-3 sm:p-4">
+        <div className="relative aspect-square w-full max-w-[440px]">
+          <canvas
+            ref={canvasRef}
+            width={500}
+            height={500}
+            onClick={handleCanvasClick}
+            className="h-full w-full cursor-crosshair touch-none rounded-2xl"
+            role="img"
+            aria-label="Mapa de calor 2D de la malla. Haz clic en un nodo para inspeccionarlo."
+          />
+        </div>
+
+        <div className="glass pointer-events-none absolute left-3 top-3 rounded-full px-3 py-1.5 text-[11px] font-medium text-mute">
+          Norte ↑ · Este →
+        </div>
+        <div className="glass pointer-events-none absolute bottom-3 left-1/2 max-w-[92%] -translate-x-1/2 truncate rounded-full px-3.5 py-1.5 text-[11px] text-mute">
+          Clic en un nodo para inspeccionar su stencil
+        </div>
       </div>
 
-      <div className="relative aspect-square w-full max-w-[620px] mx-auto overflow-hidden rounded-lg bg-slate-950 border border-slate-800">
-        <canvas
-          ref={canvasRef}
-          width={500}
-          height={500}
-          onClick={handleCanvasClick}
-          className="h-full w-full cursor-crosshair touch-none"
-        />
-      </div>
-
-      {/* Barra de colores (Leyenda) */}
-      <div className="mt-3 flex items-center gap-3 px-1 text-xs font-mono">
-        <span className="text-blue-400">{minVal.toFixed(1)} °C</span>
-        <div
-          className="h-3 flex-1 rounded-full shadow-inner"
-          style={{
-            background:
-              'linear-gradient(to right, rgb(20,50,220), rgb(50,170,180), rgb(200,230,30), rgb(245,140,10), rgb(255,40,30))',
-          }}
-        />
-        <span className="text-red-400">{maxVal.toFixed(1)} °C</span>
-      </div>
+      <ThermalLegend minVal={minVal} maxVal={maxVal} />
     </div>
   );
 }

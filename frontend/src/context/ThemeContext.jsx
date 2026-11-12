@@ -1,47 +1,42 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Sun, Moon } from 'lucide-react';
 
-// Crear contexto de tema
 const ThemeContext = createContext();
 
+const readInitialTheme = () => {
+  if (typeof document === 'undefined') return 'light';
+  // El script de index.html ya dejó la clase puesta antes del primer pintado
+  if (document.documentElement.classList.contains('dark')) return 'dark';
+  if (document.documentElement.classList.contains('light')) return 'light';
+  const saved = localStorage.getItem('clima-theme');
+  if (saved) return saved;
+  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+};
+
+const applyTheme = (newTheme) => {
+  const html = document.documentElement;
+  html.classList.toggle('dark', newTheme === 'dark');
+  html.classList.toggle('light', newTheme !== 'dark');
+  document
+    .querySelector('meta[name="theme-color"]')
+    ?.setAttribute('content', newTheme === 'dark' ? '#141414' : '#F5F5F5');
+  try {
+    localStorage.setItem('clima-theme', newTheme);
+  } catch {
+    /* almacenamiento no disponible: el tema solo dura la sesión */
+  }
+};
+
 export const ThemeProvider = ({ children }) => {
-  const [theme, setTheme] = useState('dark'); // 'dark' | 'light'
+  const [theme, setTheme] = useState(readInitialTheme); // 'dark' | 'light'
 
   useEffect(() => {
-    // Obtener tema guardado o usar preferencia del sistema
-    const savedTheme = localStorage.getItem('clima-theme');
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const initialTheme = savedTheme || (prefersDark ? 'dark' : 'light');
-    
-    setTheme(initialTheme);
-    applyTheme(initialTheme);
-  }, []);
+    applyTheme(theme);
+  }, [theme]);
 
-  const applyTheme = (newTheme) => {
-    const html = document.documentElement;
-    
-    if (newTheme === 'dark') {
-      html.classList.add('dark');
-      html.classList.remove('light');
-    } else {
-      html.classList.add('light');
-      html.classList.remove('dark');
-    }
-    
-    localStorage.setItem('clima-theme', newTheme);
-  };
+  const toggleTheme = () => setTheme((t) => (t === 'dark' ? 'light' : 'dark'));
 
-  const toggleTheme = () => {
-    const newTheme = theme === 'dark' ? 'light' : 'dark';
-    setTheme(newTheme);
-    applyTheme(newTheme);
-  };
-
-  return (
-    <ThemeContext.Provider value={{ theme, toggleTheme }}>
-      {children}
-    </ThemeContext.Provider>
-  );
+  return <ThemeContext.Provider value={{ theme, toggleTheme }}>{children}</ThemeContext.Provider>;
 };
 
 export const useTheme = () => {
@@ -52,21 +47,20 @@ export const useTheme = () => {
   return context;
 };
 
-// Componente botón de cambio de tema
-export const ThemeToggle = () => {
+// Botón de cambio de tema (se ubica en la cabecera)
+export const ThemeToggle = ({ className = '' }) => {
   const { theme, toggleTheme } = useTheme();
+  const isDark = theme === 'dark';
 
   return (
     <button
+      type="button"
       onClick={toggleTheme}
-      className="clay-button-secondary fixed top-4 right-4 z-50 p-2 rounded-clay-xs"
-      title={`Cambiar a modo ${theme === 'dark' ? 'claro (Universidad)' : 'oscuro'}`}
+      className={`btn-soft h-10 w-10 !p-0 ${className}`}
+      aria-label={isDark ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
+      title={isDark ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
     >
-      {theme === 'dark' ? (
-        <Sun size={20} className="text-amber-400" />
-      ) : (
-        <Moon size={20} className="llanos-red-text" />
-      )}
+      {isDark ? <Sun size={18} className="text-llanos-accent" /> : <Moon size={18} className="text-brand" />}
     </button>
   );
 };

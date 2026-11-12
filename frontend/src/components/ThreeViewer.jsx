@@ -1,6 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 import * as THREE from 'three';
-import { Rotate3D, Eye, Compass, ZoomIn } from 'lucide-react';
+import { Rotate3D, Eye } from 'lucide-react';
+import ThermalLegend from './ThermalLegend';
 
 // Paleta de colores térmica científica
 function getThermalColorThree(norm) {
@@ -54,7 +55,7 @@ export default function ThreeViewer({
     // 1. Escena
     const scene = new THREE.Scene();
     sceneRef.current = scene;
-    scene.background = new THREE.Color('#030712');
+    scene.background = null; // transparente: el fondo lo pone el escenario CSS (claro/oscuro)
 
     // 2. Cámara
     const width = container.clientWidth || 500;
@@ -88,7 +89,9 @@ export default function ThreeViewer({
     scene.add(fillLight);
 
     // 5. Cuadrícula de base y suelo
-    const floorGrid = new THREE.GridHelper(WORLD_SIZE * 1.3, 13, 0x1e293b, 0x0f172a);
+    const floorGrid = new THREE.GridHelper(WORLD_SIZE * 1.3, 13, 0x8a8a94, 0x8a8a94);
+    floorGrid.material.transparent = true;
+    floorGrid.material.opacity = 0.35;
     floorGrid.position.y = -0.05;
     scene.add(floorGrid);
 
@@ -423,74 +426,47 @@ export default function ThreeViewer({
       : null;
 
   return (
-    <div className="relative rounded-2xl border border-slate-800 bg-slate-900/90 shadow-2xl backdrop-blur-md overflow-hidden">
-      {/* Barra de cabecera con controles 3D */}
-      <div className="flex flex-wrap items-center justify-between border-b border-slate-800/80 bg-slate-950/70 px-4 py-2.5 text-xs">
-        <div className="flex items-center gap-2 text-slate-300 font-medium">
-          <Compass className="h-4 w-4 text-amber-400" />
-          <span>Superficie 3D Térmica · Norte (arriba), Este (derecha)</span>
-        </div>
+    <div className="flex h-full flex-col gap-3">
+      <div className="stage relative h-[360px] cursor-grab active:cursor-grabbing sm:h-[440px]">
+        <div ref={containerRef} className="h-full w-full touch-none" />
 
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => setAutoRotate(!autoRotate)}
-            className={`flex items-center gap-1 rounded-lg border px-2.5 py-1 transition ${
-              autoRotate
-                ? 'border-amber-400 bg-amber-500/20 text-amber-300'
-                : 'border-slate-800 bg-slate-800 text-slate-400 hover:text-slate-200'
-            }`}
-            title="Giro automático continuo de la cámara"
-          >
-            <Rotate3D className="h-3.5 w-3.5" />
-            <span>Giro auto</span>
-          </button>
-
-          <button
-            onClick={resetCamera}
-            className="flex items-center gap-1 rounded-lg border border-slate-800 bg-slate-800 px-2.5 py-1 text-slate-400 hover:text-slate-200 transition"
-            title="Restablecer posición inicial de la cámara"
-          >
-            <Eye className="h-3.5 w-3.5" />
-            <span>Vista inicial</span>
-          </button>
-        </div>
-      </div>
-
-      {/* Contenedor del lienzo 3D */}
-      <div className="relative w-full h-[400px] sm:h-[480px] cursor-grab active:cursor-grabbing bg-slate-950">
-        <div ref={containerRef} className="w-full h-full touch-none" />
-
-        {/* Indicador flotante del nodo seleccionado */}
         {selectedTemp !== null && (
-          <div className="absolute top-3 left-3 rounded-xl border border-amber-500/30 bg-slate-950/85 px-3 py-2 text-xs font-mono backdrop-blur-md shadow-xl pointer-events-none">
-            <span className="block text-[10px] uppercase text-amber-400 font-bold">Punto Marcado 📍</span>
-            <span className="text-base font-extrabold text-white">{selectedTemp.toFixed(1)} °C</span>
-            <span className="block text-[10px] text-slate-400">
-              Coordenada [{selectedNode.i}, {selectedNode.j}]
+          <div className="glass pointer-events-none absolute left-3 top-3 rounded-2xl px-3.5 py-2.5">
+            <span className="block text-xs text-mute">
+              Punto marcado [{selectedNode.i}, {selectedNode.j}]
             </span>
+            <span className="font-display text-2xl font-bold tabular-nums text-ink">{selectedTemp.toFixed(1)} °C</span>
           </div>
         )}
 
-        {/* Instrucción de uso táctil */}
-        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 rounded-full border border-slate-800 bg-slate-900/80 px-3 py-1 text-[11px] text-slate-400 backdrop-blur-md pointer-events-none text-center shadow-lg">
-          Arrastra para rotar · Rueda para hacer zoom · Clic para clavar un marcador
+        <div className="absolute right-3 top-3 flex gap-2">
+          <button
+            type="button"
+            onClick={() => setAutoRotate(!autoRotate)}
+            aria-pressed={autoRotate}
+            title="Giro automático de la cámara"
+            className="glass flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-semibold text-ink aria-pressed:text-brand"
+          >
+            <Rotate3D className="h-3.5 w-3.5" />
+            Giro auto
+          </button>
+          <button
+            type="button"
+            onClick={resetCamera}
+            title="Restablecer la posición inicial de la cámara"
+            className="glass flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-semibold text-ink hover:text-brand"
+          >
+            <Eye className="h-3.5 w-3.5" />
+            Vista inicial
+          </button>
+        </div>
+
+        <div className="glass pointer-events-none absolute bottom-3 left-1/2 max-w-[92%] -translate-x-1/2 truncate rounded-full px-3.5 py-1.5 text-[11px] text-mute">
+          Arrastra para rotar · Rueda para acercar · Clic para marcar un punto
         </div>
       </div>
 
-      {/* Leyenda de escala térmica */}
-      <div className="flex items-center justify-between border-t border-slate-800 bg-slate-950/70 px-4 py-2.5 text-xs font-mono">
-        <div className="flex items-center gap-2">
-          <span className="h-2.5 w-2.5 rounded-full bg-blue-500 shadow-sm shadow-blue-500/50"></span>
-          <span className="text-blue-400 font-semibold">{minVal.toFixed(0)} °C (Valle Frío)</span>
-        </div>
-
-        <div className="h-2.5 w-36 sm:w-56 rounded-full shadow-inner bg-gradient-to-r from-blue-600 via-yellow-400 to-red-600"></div>
-
-        <div className="flex items-center gap-2">
-          <span className="text-red-400 font-semibold">{maxVal.toFixed(0)} °C (Montaña de Calor)</span>
-          <span className="h-2.5 w-2.5 rounded-full bg-red-500 shadow-sm shadow-red-500/50"></span>
-        </div>
-      </div>
+      <ThermalLegend minVal={minVal} maxVal={maxVal} />
     </div>
   );
 }

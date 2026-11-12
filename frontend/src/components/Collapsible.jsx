@@ -1,15 +1,9 @@
-import React, { useState } from 'react';
+import React, { useId, useState } from 'react';
 import { ChevronDown } from 'lucide-react';
 
 /**
- * Componente Collapsible (Retraíble)
- * Permite contraer/expandir secciones para optimizar espacio
- * 
- * @param {string} title - Título del panel
- * @param {React.ReactNode} children - Contenido del panel
- * @param {boolean} defaultOpen - Abierto por defecto (true/false)
- * @param {string} icon - Icono a mostrar (componente React)
- * @param {string} className - Clases CSS adicionales
+ * Panel retraíble en claymorfismo.
+ * Mantiene la misma API: title, children, defaultOpen, icon, className, onToggle.
  */
 export const Collapsible = ({
   title,
@@ -20,54 +14,47 @@ export const Collapsible = ({
   onToggle = null,
 }) => {
   const [isOpen, setIsOpen] = useState(defaultOpen);
+  const panelId = useId();
 
   const handleToggle = () => {
-    const newState = !isOpen;
-    setIsOpen(newState);
-    onToggle?.(newState);
+    const next = !isOpen;
+    setIsOpen(next);
+    onToggle?.(next);
   };
 
   return (
-    <div className={`clay-panel ${className}`}>
-      {/* Header retraíble */}
+    <section className={`clay ${className}`}>
       <button
+        type="button"
         onClick={handleToggle}
-        className="collapsible-header w-full"
+        aria-expanded={isOpen}
+        aria-controls={panelId}
+        className="flex w-full items-center justify-between gap-3 rounded-clay px-5 py-4 text-left"
       >
-        <div className="collapsible-title">
-          {Icon && <Icon size={20} />}
-          <span>{title}</span>
-        </div>
-        <div className={`collapsible-toggle ${isOpen ? 'open' : ''}`}>
-          <ChevronDown size={20} />
-        </div>
+        <span className="flex items-center gap-3 font-display text-lg font-semibold text-ink">
+          {Icon && (
+            <span className="icon-chip">
+              <Icon size={18} />
+            </span>
+          )}
+          {title}
+        </span>
+        <span className="icon-chip">
+          <ChevronDown size={18} className={`transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
+        </span>
       </button>
 
-      {/* Contenido colapsable */}
-      <div
-        className={`collapsible-content ${!isOpen ? 'collapsed' : ''}`}
-        style={{
-          maxHeight: isOpen ? '1000px' : '0',
-        }}
-      >
-        <div className="pt-4 border-t border-llanos-red border-opacity-20">
-          {children}
+      <div id={panelId} className="collapsible" data-open={isOpen}>
+        <div className="collapsible-inner">
+          <div className="px-5 pb-5">{children}</div>
         </div>
       </div>
-    </div>
+    </section>
   );
 };
 
-/**
- * Componente CollapsibleGroup
- * Agrupa múltiples paneles collapsibles con estados independientes
- */
-export const CollapsibleGroup = ({ children, className = '' }) => {
-  return (
-    <div className={`space-y-3 ${className}`}>
-      {children}
-    </div>
-  );
-};
+export const CollapsibleGroup = ({ children, className = '' }) => (
+  <div className={`space-y-4 ${className}`}>{children}</div>
+);
 
 export default Collapsible;
