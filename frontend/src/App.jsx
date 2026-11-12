@@ -7,6 +7,8 @@ import StabilityBadge from './components/StabilityBadge';
 import Inspector from './components/Inspector';
 import ConvergenceGraph from './components/ConvergenceGraph';
 import WeatherForecastCard from './components/WeatherForecastCard';
+import { Collapsible, CollapsibleGroup } from './components/Collapsible';
+import { ThemeToggle } from './context/ThemeContext';
 import { simulateLocal, checkLocalStability, calculateDtMax } from './services/localKernel';
 import { checkBackendHealth, runApiSimulation } from './services/api';
 import { loadRealWeatherGrid } from './services/realWeather';
@@ -24,6 +26,9 @@ import {
   HelpCircle,
   Satellite,
   Globe,
+  Clock,
+  Settings,
+  BarChart3,
 } from 'lucide-react';
 
 export default function App() {
@@ -61,6 +66,14 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('simple');
   const [showWind, setShowWind] = useState(true);
   const [showGrid, setShowGrid] = useState(true);
+
+  // Estado de paneles retraíbles (Collapsibles)
+  const [openPanels, setOpenPanels] = useState({
+    forecast: true,
+    config: true,
+    inspector: true,
+    convergence: true,
+  });
 
   // Probar estado de API al iniciar
   useEffect(() => {
@@ -215,32 +228,33 @@ export default function App() {
   const windMagnitude = Math.hypot(params.u, params.v);
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 font-sans p-3 sm:p-6 lg:p-8">
+    <div className="min-h-screen bg-llanos-light dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans p-3 sm:p-6 lg:p-8 transition-colors duration-300">
+      <ThemeToggle />
       <div className="max-w-7xl mx-auto space-y-5">
         {/* Cabecera Principal */}
-        <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+        <header className="clay-panel flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-widest text-amber-400 mb-1">
+            <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-widest llanos-red-text mb-1">
               <CloudSun className="h-4 w-4" />
               <span>Simulador de Clima 3D · Métodos Numéricos</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white flex items-center gap-2">
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight llanos-red-text flex items-center gap-2">
               Pronóstico Meteorológico con Diferencias Finitas
             </h1>
-            <p className="mt-1 text-xs sm:text-sm text-slate-300 max-w-2xl leading-relaxed">
-              Predice el clima en 24 horas usando la ecuación de advección-difusión 2D. Conecta datos reales satelitales
+            <p className="mt-1 text-xs sm:text-sm text-gray-600 dark:text-slate-300 max-w-2xl leading-relaxed">
+              Predice el clima en 24 horas usando la ecuación de advención-difusión 2D. Conecta datos reales satelitales
               de Open-Meteo o simula frentes atmosféricos en 3D.
             </p>
           </div>
 
           {/* Selector de modo Simple vs Académico */}
-          <div className="flex rounded-xl bg-slate-900 border border-slate-800 p-1 self-start md:self-center">
+          <div className="flex rounded-xl glass-panel-sm p-1 self-start md:self-center">
             <button
               onClick={() => setActiveTab('simple')}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
                 activeTab === 'simple'
-                  ? 'bg-amber-500 text-slate-950 shadow-md'
-                  : 'text-slate-400 hover:text-slate-200'
+                  ? 'gradient-llanos text-white shadow-md'
+                  : 'text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-slate-200'
               }`}
             >
               <Sparkles className="h-3.5 w-3.5" />
@@ -250,8 +264,8 @@ export default function App() {
               onClick={() => setActiveTab('tecnico')}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
                 activeTab === 'tecnico'
-                  ? 'bg-sky-500 text-slate-950 shadow-md'
-                  : 'text-slate-400 hover:text-slate-200'
+                  ? 'gradient-llanos text-white shadow-md'
+                  : 'text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-slate-200'
               }`}
             >
               <GraduationCap className="h-3.5 w-3.5" />
@@ -328,75 +342,92 @@ export default function App() {
         <main className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           {/* Lado Izquierdo: Visualizador 3D o 2D + Reproductor de Tiempo (7 cols) */}
           <section className="lg:col-span-7 space-y-4">
-            {viewMode === '3d' ? (
-              <ThreeViewer
-                matrix={currentMatrix}
-                selectedNode={selectedNode}
-                onSelectNode={setSelectedNode}
-                u={params.u}
-                v={params.v}
-                minVal={realWeatherInfo ? Math.floor(realWeatherInfo.minT) - 2 : 12}
-                maxVal={realWeatherInfo ? Math.ceil(realWeatherInfo.maxT) + 3 : 38}
-                showGrid={showGrid}
-                showWind={showWind}
-                showRain={currentNodeHum >= 70}
-                reliefHeight={2.8}
-              />
-            ) : (
-              <Heatmap
-                matrix={currentMatrix}
-                selectedNode={selectedNode}
-                onSelectNode={setSelectedNode}
-                u={params.u}
-                v={params.v}
-                minVal={realWeatherInfo ? Math.floor(realWeatherInfo.minT) - 2 : 12}
-                maxVal={realWeatherInfo ? Math.ceil(realWeatherInfo.maxT) + 3 : 38}
-                showGrid={showGrid}
-                showWind={showWind}
-              />
-            )}
+            {/* Visualizador 3D/2D */}
+            <div className="glass-panel h-96">
+              {viewMode === '3d' ? (
+                <ThreeViewer
+                  matrix={currentMatrix}
+                  selectedNode={selectedNode}
+                  onSelectNode={setSelectedNode}
+                  u={params.u}
+                  v={params.v}
+                  minVal={realWeatherInfo ? Math.floor(realWeatherInfo.minT) - 2 : 12}
+                  maxVal={realWeatherInfo ? Math.ceil(realWeatherInfo.maxT) + 3 : 38}
+                  showGrid={showGrid}
+                  showWind={showWind}
+                  showRain={currentNodeHum >= 70}
+                  reliefHeight={2.8}
+                />
+              ) : (
+                <Heatmap
+                  matrix={currentMatrix}
+                  selectedNode={selectedNode}
+                  onSelectNode={setSelectedNode}
+                  u={params.u}
+                  v={params.v}
+                  minVal={realWeatherInfo ? Math.floor(realWeatherInfo.minT) - 2 : 12}
+                  maxVal={realWeatherInfo ? Math.ceil(realWeatherInfo.maxT) + 3 : 38}
+                  showGrid={showGrid}
+                  showWind={showWind}
+                />
+              )}
+            </div>
 
-            {/* Controles de Reproducción 24 Horas */}
-            <TimeControls
-              isPlaying={isPlaying}
-              onTogglePlay={() => setIsPlaying(!isPlaying)}
-              onStep={() => setCurrentStep((prev) => Math.min(simulation.snapshots.length - 1, prev + 1))}
-              onReset={() => {
-                setIsPlaying(false);
-                setCurrentStep(0);
-              }}
-              currentIndex={currentStep}
-              totalSnapshots={simulation ? simulation.snapshots.length : 1}
-              timestamps={simulation ? simulation.timestamps : []}
-              speed={speed}
-              onChangeSpeed={setSpeed}
-              onSeek={setCurrentStep}
-            />
+            {/* Controles de Reproducción 24 Horas - COLLAPSIBLE */}
+            <Collapsible
+              title="Pronóstico en Vivo - Hora Simulada 00:00"
+              icon={Clock}
+              defaultOpen={openPanels.forecast}
+              onToggle={(isOpen) => setOpenPanels({...openPanels, forecast: isOpen})}
+            >
+              <TimeControls
+                isPlaying={isPlaying}
+                onTogglePlay={() => setIsPlaying(!isPlaying)}
+                onStep={() => setCurrentStep((prev) => Math.min(simulation.snapshots.length - 1, prev + 1))}
+                onReset={() => {
+                  setIsPlaying(false);
+                  setCurrentStep(0);
+                }}
+                currentIndex={currentStep}
+                totalSnapshots={simulation ? simulation.snapshots.length : 1}
+                timestamps={simulation ? simulation.timestamps : []}
+                speed={speed}
+                onChangeSpeed={setSpeed}
+                onSeek={setCurrentStep}
+              />
+            </Collapsible>
           </section>
 
-          {/* Lado Derecho: Tarjeta del Clima Humano + Controles (5 cols) */}
+          {/* Lado Derecho: Paneles Retraíbles (5 cols) */}
           <aside className="lg:col-span-5 space-y-4">
-            {/* Tarjeta de Pronóstico Humano */}
-            <WeatherForecastCard
-              temp={currentNodeTemp}
-              humidity={currentNodeHum}
-              pressure={currentNodePres}
-              windSpeed={windMagnitude}
-              currentTimeSec={currentTimeSec}
-              onJumpToTime={setCurrentStep}
-              snapshots={simulation ? simulation.snapshots : []}
-              humiditySnapshots={simulation ? simulation.humiditySnapshots : []}
-              pressureSnapshots={simulation ? simulation.pressureSnapshots : []}
-              timestamps={simulation ? simulation.timestamps : []}
-              selectedNode={selectedNode}
-            />
+            {/* Pronóstico en Vivo - COLLAPSIBLE */}
+            <Collapsible
+              title="Pronóstico en Vivo"
+              icon={CloudSun}
+              defaultOpen={openPanels.forecast}
+              onToggle={(isOpen) => setOpenPanels({...openPanels, forecast: isOpen})}
+            >
+              <WeatherForecastCard
+                temp={currentNodeTemp}
+                humidity={currentNodeHum}
+                pressure={currentNodePres}
+                windSpeed={windMagnitude}
+                currentTimeSec={currentTimeSec}
+                onJumpToTime={setCurrentStep}
+                snapshots={simulation ? simulation.snapshots : []}
+                humiditySnapshots={simulation ? simulation.humiditySnapshots : []}
+                pressureSnapshots={simulation ? simulation.pressureSnapshots : []}
+                timestamps={simulation ? simulation.timestamps : []}
+                selectedNode={selectedNode}
+              />
+            </Collapsible>
 
             {/* Tarjeta de Estabilidad Numérica */}
             <div
-              className={`rounded-2xl border p-4 shadow-xl backdrop-blur-md transition ${
+              className={`glass-panel transition ${
                 liveStability.is_stable
-                  ? 'border-emerald-500/30 bg-emerald-950/20'
-                  : 'border-rose-500/40 bg-rose-950/30 animate-pulse'
+                  ? 'border-emerald-500/30'
+                  : 'border-rose-500/40 animate-pulse'
               }`}
             >
               <div className="flex items-center gap-2">
@@ -410,7 +441,7 @@ export default function App() {
                 </span>
               </div>
 
-              <p className="mt-1.5 text-xs text-slate-300 leading-relaxed">
+              <p className="mt-1.5 text-xs text-slate-300 dark:text-slate-300 leading-relaxed">
                 {liveStability.is_stable ? (
                   <>
                     Avanzando en pasos de <strong>{Math.round(params.dt / 60)} min</strong>. La física se calcula sin
@@ -427,63 +458,84 @@ export default function App() {
               {!liveStability.is_stable && (
                 <button
                   onClick={handleAutoFitDt}
-                  className="mt-3 w-full rounded-lg bg-rose-500 hover:bg-rose-400 text-slate-950 font-bold py-2 text-xs transition"
+                  className="mt-3 w-full rounded-lg gradient-llanos text-white font-bold py-2 text-xs transition hover:shadow-lg"
                 >
                   Corregir a paso seguro ({Math.floor(liveStability.dt_max)} s)
                 </button>
               )}
             </div>
 
-            {/* Panel de Controles */}
-            <Controls
-              params={params}
-              onChangeParam={handleParamChange}
-              onApplyPreset={handleApplyPreset}
-              backendOnline={backendOnline}
-              useBackend={useBackend}
-              onToggleUseBackend={() => setUseBackend(!useBackend)}
-              showGrid={showGrid}
-              onToggleGrid={setShowGrid}
-              showWind={showWind}
-              onToggleWind={setShowWind}
-              onRunSimulation={() => executeSimulation(params)}
-              isCalculating={isCalculating}
-              onLoadRealWeather={handleLoadRealWeather}
-              isLoadingRealWeather={isLoadingRealWeather}
-              realWeatherInfo={realWeatherInfo}
-              onClearRealWeather={handleClearRealWeather}
-            />
-          </aside>
-        </main>
+            {/* Configuración Física - COLLAPSIBLE */}
+            <Collapsible
+              title="Configuración Física"
+              icon={Settings}
+              defaultOpen={openPanels.config}
+              onToggle={(isOpen) => setOpenPanels({...openPanels, config: isOpen})}
+            >
+              <Controls
+                params={params}
+                onChangeParam={handleParamChange}
+                onApplyPreset={handleApplyPreset}
+                backendOnline={backendOnline}
+                useBackend={useBackend}
+                onToggleUseBackend={() => setUseBackend(!useBackend)}
+                showGrid={showGrid}
+                onToggleGrid={setShowGrid}
+                showWind={showWind}
+                onToggleWind={setShowWind}
+                onRunSimulation={() => executeSimulation(params)}
+                isCalculating={isCalculating}
+                onLoadRealWeather={handleLoadRealWeather}
+                isLoadingRealWeather={isLoadingRealWeather}
+                realWeatherInfo={realWeatherInfo}
+                onClearRealWeather={handleClearRealWeather}
+              />
+            </Collapsible>
 
         {/* Sección Inferior: Conmutable entre Modo Intuitivo y Académico */}
         {activeTab === 'tecnico' ? (
-          <section className="grid grid-cols-1 lg:grid-cols-12 gap-6 border-t border-slate-800 pt-6">
+          <section className="grid grid-cols-1 lg:grid-cols-12 gap-6 border-t border-llanos-red border-opacity-20 pt-6">
+            {/* Inspector del Nodo - COLLAPSIBLE */}
             <div className="lg:col-span-4">
-              <Inspector
-                matrix={currentMatrix}
-                selectedNode={selectedNode}
-                alpha={params.alpha}
-                u={params.u}
-                v={params.v}
-                dx={params.dx}
-                dt={params.dt}
-              />
+              <Collapsible
+                title="Inspector del Nodo"
+                icon={Box}
+                defaultOpen={openPanels.inspector}
+                onToggle={(isOpen) => setOpenPanels({...openPanels, inspector: isOpen})}
+              >
+                <Inspector
+                  matrix={currentMatrix}
+                  selectedNode={selectedNode}
+                  alpha={params.alpha}
+                  u={params.u}
+                  v={params.v}
+                  dx={params.dx}
+                  dt={params.dt}
+                />
+              </Collapsible>
             </div>
 
+            {/* Evolución del Nodo - COLLAPSIBLE */}
             <div className="lg:col-span-8">
-              <ConvergenceGraph
-                nodeHistory={nodeHistory}
-                timestamps={simulation ? simulation.timestamps : []}
-                gridH={params.dx / 1000}
-              />
+              <Collapsible
+                title="Evolución del Nodo en 24 Horas"
+                icon={BarChart3}
+                defaultOpen={openPanels.convergence}
+                onToggle={(isOpen) => setOpenPanels({...openPanels, convergence: isOpen})}
+              >
+                <ConvergenceGraph
+                  nodeHistory={nodeHistory}
+                  timestamps={simulation ? simulation.timestamps : []}
+                  gridH={params.dx / 1000}
+                />
+              </Collapsible>
             </div>
           </section>
         ) : (
           /* Explicación didáctica simple */
-          <section className="rounded-2xl border border-slate-800 bg-slate-900/60 p-5 shadow-xl grid grid-cols-1 md:grid-cols-3 gap-5 text-xs text-slate-300">
+          <section className="clay-panel grid grid-cols-1 md:grid-cols-3 gap-5 text-xs text-slate-700 dark:text-slate-300">
             <div className="space-y-1.5">
-              <div className="flex items-center gap-1.5 font-bold text-amber-400 text-sm">
+              <div className="flex items-center gap-1.5 font-bold llanos-red-text text-sm">
                 <Flame className="h-4 w-4" />
                 <span>1. Calor y Temperatura (T)</span>
               </div>
@@ -494,7 +546,7 @@ export default function App() {
             </div>
 
             <div className="space-y-1.5">
-              <div className="flex items-center gap-1.5 font-bold text-sky-400 text-sm">
+              <div className="flex items-center gap-1.5 font-bold llanos-accent-red-text text-sm">
                 <Wind className="h-4 w-4" />
                 <span>2. Viento y Presión (P, V)</span>
               </div>
@@ -505,7 +557,7 @@ export default function App() {
             </div>
 
             <div className="space-y-1.5">
-              <div className="flex items-center gap-1.5 font-bold text-emerald-400 text-sm">
+              <div className="flex items-center gap-1.5 font-bold text-emerald-600 dark:text-emerald-400 text-sm">
                 <HelpCircle className="h-4 w-4" />
                 <span>3. Humedad y Lluvia (H)</span>
               </div>
@@ -518,7 +570,7 @@ export default function App() {
         )}
 
         {/* Pie de página */}
-        <footer className="border-t border-slate-800/80 pt-4 pb-8 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-500 font-mono">
+        <footer className="border-t border-llanos-red border-opacity-20 pt-4 pb-8 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-gray-600 dark:text-slate-500 font-mono">
           <span>Universidad de los Llanos · Métodos Numéricos</span>
           <span>Julian Esteban Romero Guzmán · Eduar Alexis Murcia Rodríguez</span>
         </footer>
