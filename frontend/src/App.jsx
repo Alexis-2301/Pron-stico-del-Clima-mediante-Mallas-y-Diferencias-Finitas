@@ -491,6 +491,8 @@ export default function App() {
                 onClearRealWeather={handleClearRealWeather}
               />
             </Collapsible>
+          </aside>
+        </main>
 
         {/* Sección Inferior: Conmutable entre Modo Intuitivo y Académico */}
         {activeTab === 'tecnico' ? (
