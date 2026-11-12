@@ -1,62 +1,46 @@
-/* index.css - Estilos Globales con Claymorfismo, Glassmorfismo y Tema Universidad */
-
 /* ============================================================================
-   SISTEMA DE TEMAS (Claro/Oscuro) - CSS Variables
+   SISTEMA DE TEMAS - CSS Variables para Claymorfismo + Glasmorfismo
    ============================================================================ */
 
 :root {
-  /* Modo Claro (Universidad de los Llanos) */
+  /* Modo Claro */
   --bg-primary: #F5F5F5;
   --bg-secondary: #FFFFFF;
   --bg-tertiary: #E8E8E8;
-  --bg-quaternary: #D9D9D9;
   
   --text-primary: #1a1a1a;
   --text-secondary: #4a4a4a;
   --text-tertiary: #6a6a6a;
   
   --accent-red: #DC143C;
-  --accent-red-light: #FF6B35;
-  --accent-red-dark: #8B0000;
+  --accent-orange: #FF6B35;
+  --accent-dark: #8B0000;
   
-  --border-color: #D0D0D0;
-  --shadow-color: rgba(0, 0, 0, 0.08);
-  --shadow-color-md: rgba(0, 0, 0, 0.12);
-  --shadow-color-lg: rgba(0, 0, 0, 0.15);
-  
-  /* Colores funcionales - Modo claro */
-  --success: #10B981;
-  --warning: #F59E0B;
-  --error: #EF4444;
-  --info: #3B82F6;
+  --border-light: #D0D0D0;
+  --shadow-sm: rgba(0, 0, 0, 0.08);
+  --shadow-md: rgba(0, 0, 0, 0.12);
+  --shadow-lg: rgba(0, 0, 0, 0.16);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    /* Modo Oscuro (Actual) */
+    /* Modo Oscuro */
     --bg-primary: #030712;
     --bg-secondary: #0f172a;
     --bg-tertiary: #1e293b;
-    --bg-quaternary: #334155;
     
     --text-primary: #f1f5f9;
     --text-secondary: #cbd5e1;
     --text-tertiary: #94a3b8;
     
     --accent-red: #DC143C;
-    --accent-red-light: #FF6B35;
-    --accent-red-dark: #A01030;
+    --accent-orange: #FF6B35;
+    --accent-dark: #A01030;
     
-    --border-color: #475569;
-    --shadow-color: rgba(0, 0, 0, 0.3);
-    --shadow-color-md: rgba(0, 0, 0, 0.4);
-    --shadow-color-lg: rgba(0, 0, 0, 0.5);
-    
-    /* Colores funcionales - Modo oscuro */
-    --success: #34D399;
-    --warning: #FBBF24;
-    --error: #F87171;
-    --info: #60A5FA;
+    --border-light: #475569;
+    --shadow-sm: rgba(0, 0, 0, 0.4);
+    --shadow-md: rgba(0, 0, 0, 0.5);
+    --shadow-lg: rgba(0, 0, 0, 0.6);
   }
 }
 
@@ -64,54 +48,36 @@ html.dark {
   --bg-primary: #030712;
   --bg-secondary: #0f172a;
   --bg-tertiary: #1e293b;
-  --bg-quaternary: #334155;
-  
   --text-primary: #f1f5f9;
   --text-secondary: #cbd5e1;
   --text-tertiary: #94a3b8;
-  
   --accent-red: #DC143C;
-  --accent-red-light: #FF6B35;
-  --accent-red-dark: #A01030;
-  
-  --border-color: #475569;
-  --shadow-color: rgba(0, 0, 0, 0.3);
-  --shadow-color-md: rgba(0, 0, 0, 0.4);
-  --shadow-color-lg: rgba(0, 0, 0, 0.5);
-  
-  --success: #34D399;
-  --warning: #FBBF24;
-  --error: #F87171;
-  --info: #60A5FA;
+  --accent-orange: #FF6B35;
+  --accent-dark: #A01030;
+  --border-light: #475569;
+  --shadow-sm: rgba(0, 0, 0, 0.4);
+  --shadow-md: rgba(0, 0, 0, 0.5);
+  --shadow-lg: rgba(0, 0, 0, 0.6);
 }
 
 html.light {
   --bg-primary: #F5F5F5;
   --bg-secondary: #FFFFFF;
   --bg-tertiary: #E8E8E8;
-  --bg-quaternary: #D9D9D9;
-  
   --text-primary: #1a1a1a;
   --text-secondary: #4a4a4a;
   --text-tertiary: #6a6a6a;
-  
   --accent-red: #DC143C;
-  --accent-red-light: #FF6B35;
-  --accent-red-dark: #8B0000;
-  
-  --border-color: #D0D0D0;
-  --shadow-color: rgba(0, 0, 0, 0.08);
-  --shadow-color-md: rgba(0, 0, 0, 0.12);
-  --shadow-color-lg: rgba(0, 0, 0, 0.15);
-  
-  --success: #10B981;
-  --warning: #F59E0B;
-  --error: #EF4444;
-  --info: #3B82F6;
+  --accent-orange: #FF6B35;
+  --accent-dark: #8B0000;
+  --border-light: #D0D0D0;
+  --shadow-sm: rgba(0, 0, 0, 0.08);
+  --shadow-md: rgba(0, 0, 0, 0.12);
+  --shadow-lg: rgba(0, 0, 0, 0.16);
 }
 
 /* ============================================================================
-   ESTILOS BASE - Normalizacion y Layout
+   RESET Y BASE
    ============================================================================ */
 
 * {
@@ -127,7 +93,7 @@ html, body {
 }
 
 body {
-  font-family: '"IBM Plex Sans"', system-ui, -apple-system, sans-serif;
+  font-family: '"IBM Plex Sans"', -apple-system, system-ui, sans-serif;
   line-height: 1.6;
   transition: background-color 0.3s ease, color 0.3s ease;
 }
@@ -138,20 +104,19 @@ body {
 }
 
 /* ============================================================================
-   CLAYMORFISMO - Tarjetas y Paneles con Volumen
+   CLAYMORFISMO CON GRADIENTES - Tarjetas con Volumen y Color
    ============================================================================ */
 
-.clay-panel,
-.clay-card {
+.clay-panel {
   background: var(--bg-secondary);
-  border-radius: 20px;
+  border-radius: 24px;
   padding: 24px;
-  border: 1px solid rgba(220, 20, 60, 0.08);
+  border: 1px solid rgba(220, 20, 60, 0.1);
   box-shadow: 
-    0 1px 3px var(--shadow-color),
-    0 4px 12px var(--shadow-color-md),
-    0 8px 24px rgba(0, 0, 0, 0.04);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    0 2px 4px var(--shadow-sm),
+    0 6px 16px var(--shadow-md),
+    0 12px 32px var(--shadow-lg);
+  transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
   position: relative;
   overflow: hidden;
 }
@@ -163,129 +128,114 @@ body {
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(
-    135deg,
-    rgba(220, 20, 60, 0.02) 0%,
-    transparent 100%
-  );
+  background: linear-gradient(135deg, rgba(220, 20, 60, 0.03) 0%, transparent 100%);
   pointer-events: none;
 }
 
-.clay-panel:hover,
-.clay-card:hover {
+.clay-panel:hover {
+  transform: translateY(-8px);
   box-shadow: 
-    0 2px 4px var(--shadow-color),
-    0 8px 16px var(--shadow-color-md),
-    0 12px 32px var(--shadow-color-lg);
-  transform: translateY(-4px);
-  border-color: rgba(220, 20, 60, 0.15);
-}
-
-.clay-card-sm {
-  background: var(--bg-secondary);
-  border-radius: 16px;
-  padding: 16px;
-  border: 1px solid rgba(220, 20, 60, 0.06);
-  box-shadow: 
-    0 2px 8px var(--shadow-color),
-    0 4px 12px rgba(0, 0, 0, 0.02);
-  transition: all 0.3s ease;
-}
-
-.clay-button {
-  background: linear-gradient(135deg, var(--accent-red) 0%, var(--accent-red-light) 100%);
-  color: white;
-  border: none;
-  border-radius: 12px;
-  padding: 12px 24px;
-  font-weight: 600;
-  font-size: 0.95rem;
-  cursor: pointer;
-  box-shadow: 
-    0 4px 12px rgba(220, 20, 60, 0.3),
-    0 8px 24px rgba(220, 20, 60, 0.15);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  overflow: hidden;
-}
-
-.clay-button:hover {
-  box-shadow: 
-    0 6px 16px rgba(220, 20, 60, 0.4),
-    0 12px 32px rgba(220, 20, 60, 0.25);
-  transform: translateY(-2px);
-}
-
-.clay-button:active {
-  transform: translateY(0);
-}
-
-.clay-button-secondary {
-  background: var(--bg-tertiary);
-  color: var(--text-primary);
-  border: 1.5px solid var(--border-color);
-  box-shadow: 0 2px 8px var(--shadow-color);
-}
-
-.clay-button-secondary:hover {
-  background: var(--bg-quaternary);
-  border-color: rgba(220, 20, 60, 0.3);
-}
-
-/* ============================================================================
-   GLASSMORFISMO - Paneles Traslúcidos
-   ============================================================================ */
-
-.glass-panel {
-  background: rgba(255, 255, 255, 0.75);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1.5px solid rgba(255, 255, 255, 0.3);
-  border-radius: 20px;
-  padding: 20px;
-  box-shadow: 
-    0 4px 12px rgba(0, 0, 0, 0.06),
-    0 8px 24px rgba(0, 0, 0, 0.08);
-  transition: all 0.3s ease;
-  position: relative;
-}
-
-html.dark .glass-panel {
-  background: rgba(15, 23, 42, 0.65);
-  border: 1.5px solid rgba(255, 255, 255, 0.12);
-  box-shadow: 
-    0 4px 12px rgba(0, 0, 0, 0.25),
-    0 8px 24px rgba(0, 0, 0, 0.3);
-}
-
-.glass-panel:hover {
-  background: rgba(255, 255, 255, 0.85);
+    0 4px 8px var(--shadow-sm),
+    0 12px 24px var(--shadow-md),
+    0 20px 48px var(--shadow-lg);
   border-color: rgba(220, 20, 60, 0.2);
 }
 
-html.dark .glass-panel:hover {
-  background: rgba(15, 23, 42, 0.75);
-  border-color: rgba(220, 20, 60, 0.3);
+.clay-card {
+  background: var(--bg-secondary);
+  border-radius: 20px;
+  padding: 20px;
+  border: 1px solid rgba(220, 20, 60, 0.08);
+  box-shadow: 
+    0 2px 4px var(--shadow-sm),
+    0 6px 16px var(--shadow-md);
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-.glass-panel-sm {
-  background: rgba(255, 255, 255, 0.6);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  border-radius: 16px;
-  padding: 12px 16px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-  transition: all 0.2s ease;
+.clay-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 
+    0 4px 8px var(--shadow-sm),
+    0 10px 24px var(--shadow-md);
 }
 
-html.dark .glass-panel-sm {
-  background: rgba(15, 23, 42, 0.55);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+/* Tarjetas con Gradientes de Fondo */
+.card-gradient-red {
+  background: linear-gradient(135deg, rgba(220, 20, 60, 0.15) 0%, rgba(220, 20, 60, 0.05) 100%);
+  border-color: rgba(220, 20, 60, 0.2);
+}
+
+.card-gradient-orange {
+  background: linear-gradient(135deg, rgba(255, 107, 53, 0.15) 0%, rgba(255, 107, 53, 0.05) 100%);
+  border-color: rgba(255, 107, 53, 0.2);
+}
+
+.card-gradient-blue {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(59, 130, 246, 0.05) 100%);
+  border-color: rgba(59, 130, 246, 0.2);
+}
+
+.card-gradient-green {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(16, 185, 129, 0.05) 100%);
+  border-color: rgba(16, 185, 129, 0.2);
+}
+
+.card-gradient-purple {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(139, 92, 246, 0.05) 100%);
+  border-color: rgba(139, 92, 246, 0.2);
 }
 
 /* ============================================================================
-   COMPONENTES COLLAPSIBLE (RETRAÍBLES)
+   GLASMORFISMO - Paneles Traslúcidos
+   ============================================================================ */
+
+.glass-panel {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1.5px solid rgba(255, 255, 255, 0.3);
+  border-radius: 24px;
+  padding: 24px;
+  box-shadow: 
+    0 4px 12px rgba(0, 0, 0, 0.08),
+    0 12px 32px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+html.dark .glass-panel {
+  background: rgba(15, 23, 42, 0.7);
+  border-color: rgba(255, 255, 255, 0.15);
+  box-shadow: 
+    0 4px 12px rgba(0, 0, 0, 0.3),
+    0 12px 32px rgba(0, 0, 0, 0.4);
+}
+
+.glass-panel:hover {
+  border-color: rgba(220, 20, 60, 0.3);
+  background: rgba(255, 255, 255, 0.9);
+}
+
+html.dark .glass-panel:hover {
+  background: rgba(15, 23, 42, 0.8);
+}
+
+.glass-panel-sm {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 16px;
+  padding: 14px 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+html.dark .glass-panel-sm {
+  background: rgba(15, 23, 42, 0.65);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+/* ============================================================================
+   COLLAPSIBLES - Paneles Retraíbles Estilizados
    ============================================================================ */
 
 .collapsible-header {
@@ -294,61 +244,72 @@ html.dark .glass-panel-sm {
   align-items: center;
   cursor: pointer;
   user-select: none;
-  padding: 16px;
-  border-radius: 14px;
-  background: linear-gradient(
-    135deg,
-    rgba(220, 20, 60, 0.12) 0%,
-    rgba(255, 107, 53, 0.06) 100%
-  );
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 16px 20px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(220, 20, 60, 0.1) 0%, rgba(255, 107, 53, 0.05) 100%);
+  border: 1.5px solid rgba(220, 20, 60, 0.15);
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
   font-weight: 600;
   color: var(--text-primary);
+  position: relative;
+  overflow: hidden;
+}
+
+.collapsible-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  pointer-events: none;
 }
 
 .collapsible-header:hover {
-  background: linear-gradient(
-    135deg,
-    rgba(220, 20, 60, 0.18) 0%,
-    rgba(255, 107, 53, 0.12) 100%
-  );
-  padding-left: 20px;
+  background: linear-gradient(135deg, rgba(220, 20, 60, 0.15) 0%, rgba(255, 107, 53, 0.1) 100%);
+  border-color: rgba(220, 20, 60, 0.25);
+  transform: translateX(4px);
+  box-shadow: 0 4px 12px rgba(220, 20, 60, 0.1);
 }
 
 .collapsible-title {
   font-weight: 600;
   font-size: 1rem;
-  color: var(--text-primary);
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   letter-spacing: 0.3px;
+  color: var(--text-primary);
 }
 
 .collapsible-toggle {
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
   color: var(--accent-red);
   flex-shrink: 0;
+  background: rgba(220, 20, 60, 0.08);
+  border-radius: 8px;
 }
 
 .collapsible-toggle.open {
   transform: rotate(180deg);
+  background: rgba(220, 20, 60, 0.12);
 }
 
 .collapsible-content {
   max-height: 2000px;
   overflow: hidden;
   transition: 
-    max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+    max-height 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
     opacity 0.3s ease,
     margin-top 0.3s ease;
   opacity: 1;
-  margin-top: 12px;
+  margin-top: 16px;
 }
 
 .collapsible-content.collapsed {
@@ -359,41 +320,52 @@ html.dark .glass-panel-sm {
 }
 
 /* ============================================================================
-   PALETA DE COLORES UNIVERSIDAD DE LOS LLANOS
+   BOTONES - Claymorfismo + Gradientes Universidad
    ============================================================================ */
 
-.llanos-red-bg {
-  background-color: #DC143C;
+.clay-button {
+  background: linear-gradient(135deg, #DC143C 0%, #FF6B35 100%);
+  color: white;
+  border: none;
+  border-radius: 14px;
+  padding: 12px 24px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  box-shadow: 
+    0 4px 12px rgba(220, 20, 60, 0.35),
+    0 8px 24px rgba(220, 20, 60, 0.2);
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: relative;
+  overflow: hidden;
 }
 
-.llanos-red-text {
-  color: #DC143C;
+.clay-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.2);
+  transition: left 0.3s ease;
 }
 
-.llanos-accent-red-bg {
-  background-color: #FF6B35;
+.clay-button:hover {
+  transform: translateY(-4px);
+  box-shadow: 
+    0 8px 20px rgba(220, 20, 60, 0.4),
+    0 16px 40px rgba(220, 20, 60, 0.3);
 }
 
-.llanos-accent-red-text {
-  color: #FF6B35;
+.clay-button:active {
+  transform: translateY(-2px);
 }
 
-.llanos-dark-bg {
-  background-color: #1a1a1a;
-  color: #F5F5F5;
-}
+/* ============================================================================
+   UTILIDADES DE COLOR Y GRADIENTES
+   ============================================================================ */
 
-.llanos-light-bg {
-  background-color: #F5F5F5;
-  color: #1a1a1a;
-}
-
-.llanos-light {
-  background-color: #F5F5F5;
-  color: #1a1a1a;
-}
-
-/* Gradientes Universidad */
 .gradient-llanos {
   background: linear-gradient(135deg, #DC143C 0%, #FF6B35 100%);
 }
@@ -402,21 +374,22 @@ html.dark .glass-panel-sm {
   background: linear-gradient(135deg, #FF6B35 0%, #DC143C 100%);
 }
 
-.gradient-llanos-light {
-  background: linear-gradient(
-    135deg,
-    rgba(220, 20, 60, 0.12) 0%,
-    rgba(255, 107, 53, 0.06) 100%
-  );
+.llanos-red-text {
+  color: #DC143C;
+  font-weight: 600;
+}
+
+.llanos-orange-text {
+  color: #FF6B35;
 }
 
 /* ============================================================================
-   SCROLLBAR PERSONALIZADO
+   SCROLLBAR - Personalizado con Gradiente
    ============================================================================ */
 
 ::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
+  width: 12px;
+  height: 12px;
 }
 
 ::-webkit-scrollbar-track {
@@ -427,22 +400,21 @@ html.dark .glass-panel-sm {
 ::-webkit-scrollbar-thumb {
   background: linear-gradient(135deg, #DC143C 0%, #FF6B35 100%);
   border-radius: 10px;
-  transition: background 0.3s ease;
   border: 2px solid var(--bg-tertiary);
+  transition: all 0.3s ease;
 }
 
 ::-webkit-scrollbar-thumb:hover {
   background: linear-gradient(135deg, #FF6B35 0%, #DC143C 100%);
 }
 
-/* Firefox Scrollbar */
 * {
   scrollbar-width: thin;
   scrollbar-color: rgba(220, 20, 60, 0.6) var(--bg-tertiary);
 }
 
 /* ============================================================================
-   ANIMACIONES Y TRANSICIONES
+   ANIMACIONES SUAVES
    ============================================================================ */
 
 @keyframes slideDown {
@@ -456,94 +428,79 @@ html.dark .glass-panel-sm {
   }
 }
 
-@keyframes slideUp {
-  from {
-    opacity: 1;
-    transform: translateY(0);
-  }
-  to {
-    opacity: 0;
-    transform: translateY(-15px);
-  }
-}
-
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
-@keyframes pulse-red {
-  0%, 100% {
-    box-shadow: 0 0 0 0 rgba(220, 20, 60, 0.7);
-  }
-  50% {
-    box-shadow: 0 0 0 12px rgba(220, 20, 60, 0);
-  }
-}
-
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-8px);
-  }
+@keyframes pulse-subtle {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.8; }
 }
 
 .animate-slide-down {
-  animation: slideDown 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.animate-slide-up {
-  animation: slideUp 0.3s ease;
+  animation: slideDown 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .animate-fade-in {
   animation: fadeIn 0.3s ease;
 }
 
-.animate-pulse-red {
-  animation: pulse-red 2s infinite;
-}
-
-.animate-float {
-  animation: float 3s ease-in-out infinite;
+.animate-pulse-subtle {
+  animation: pulse-subtle 2s ease-in-out infinite;
 }
 
 /* ============================================================================
-   SOMBRAS CLAYMORFISMO
+   SOMBRAS MEJORADAS
    ============================================================================ */
 
 .shadow-clay-sm {
-  box-shadow: 0 4px 12px var(--shadow-color);
+  box-shadow: 0 4px 12px var(--shadow-md);
 }
 
 .shadow-clay-md {
-  box-shadow: 0 8px 24px var(--shadow-color-md);
+  box-shadow: 
+    0 6px 16px var(--shadow-md),
+    0 12px 32px var(--shadow-lg);
 }
 
 .shadow-clay-lg {
-  box-shadow: 0 12px 32px var(--shadow-color-lg);
-}
-
-.shadow-glass-sm {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-}
-
-.shadow-glass-md {
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-}
-
-.shadow-glass-lg {
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  box-shadow: 
+    0 12px 24px var(--shadow-md),
+    0 20px 48px var(--shadow-lg);
 }
 
 /* ============================================================================
-   BORDES Y ESQUINAS
+   RESPONSIVE DESIGN
+   ============================================================================ */
+
+@media (max-width: 768px) {
+  .clay-panel {
+    padding: 16px;
+    border-radius: 16px;
+  }
+
+  .collapsible-header {
+    padding: 14px 16px;
+    font-size: 0.95rem;
+  }
+
+  .glass-panel {
+    padding: 16px;
+    border-radius: 16px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ============================================================================
+   UTILIDADES ADICIONALES
    ============================================================================ */
 
 .rounded-clay {
@@ -562,75 +519,11 @@ html.dark .glass-panel-sm {
   border-radius: 16px;
 }
 
-.rounded-clay-xs {
-  border-radius: 12px;
-}
-
-/* ============================================================================
-   UTILIDADES ADICIONALES
-   ============================================================================ */
-
 .transition-smooth {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.backdrop-blur-sm {
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-}
-
-.backdrop-blur-md {
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .backdrop-blur-lg {
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-}
-
-/* Efecto de elevación */
-.elevated {
-  position: relative;
-  z-index: 1;
-}
-
-.elevated::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: var(--shadow-color-lg);
-  border-radius: inherit;
-  z-index: -1;
-  blur: 20px;
-}
-
-/* ============================================================================
-   RESPONSIVE Y MEDIA QUERIES
-   ============================================================================ */
-
-@media (max-width: 768px) {
-  .clay-panel,
-  .clay-card {
-    padding: 16px;
-    border-radius: 16px;
-  }
-
-  .collapsible-header {
-    padding: 12px;
-    font-size: 0.95rem;
-  }
-
-  .glass-panel {
-    padding: 16px;
-    border-radius: 16px;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  * {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
 }
