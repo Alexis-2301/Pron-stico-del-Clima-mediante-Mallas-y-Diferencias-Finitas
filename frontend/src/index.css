@@ -1,7 +1,7 @@
 /* index.css - Estilos Globales con Claymorfismo, Glassmorfismo y Tema Universidad */
 
 /* ============================================================================
-   SISTEMA DE TEMAS (Claro/Oscuro)
+   SISTEMA DE TEMAS (Claro/Oscuro) - CSS Variables
    ============================================================================ */
 
 :root {
@@ -9,6 +9,7 @@
   --bg-primary: #F5F5F5;
   --bg-secondary: #FFFFFF;
   --bg-tertiary: #E8E8E8;
+  --bg-quaternary: #D9D9D9;
   
   --text-primary: #1a1a1a;
   --text-secondary: #4a4a4a;
@@ -20,6 +21,8 @@
   
   --border-color: #D0D0D0;
   --shadow-color: rgba(0, 0, 0, 0.08);
+  --shadow-color-md: rgba(0, 0, 0, 0.12);
+  --shadow-color-lg: rgba(0, 0, 0, 0.15);
   
   /* Colores funcionales - Modo claro */
   --success: #10B981;
@@ -34,6 +37,7 @@
     --bg-primary: #030712;
     --bg-secondary: #0f172a;
     --bg-tertiary: #1e293b;
+    --bg-quaternary: #334155;
     
     --text-primary: #f1f5f9;
     --text-secondary: #cbd5e1;
@@ -45,6 +49,8 @@
     
     --border-color: #475569;
     --shadow-color: rgba(0, 0, 0, 0.3);
+    --shadow-color-md: rgba(0, 0, 0, 0.4);
+    --shadow-color-lg: rgba(0, 0, 0, 0.5);
     
     /* Colores funcionales - Modo oscuro */
     --success: #34D399;
@@ -58,6 +64,7 @@ html.dark {
   --bg-primary: #030712;
   --bg-secondary: #0f172a;
   --bg-tertiary: #1e293b;
+  --bg-quaternary: #334155;
   
   --text-primary: #f1f5f9;
   --text-secondary: #cbd5e1;
@@ -69,6 +76,8 @@ html.dark {
   
   --border-color: #475569;
   --shadow-color: rgba(0, 0, 0, 0.3);
+  --shadow-color-md: rgba(0, 0, 0, 0.4);
+  --shadow-color-lg: rgba(0, 0, 0, 0.5);
   
   --success: #34D399;
   --warning: #FBBF24;
@@ -80,6 +89,7 @@ html.light {
   --bg-primary: #F5F5F5;
   --bg-secondary: #FFFFFF;
   --bg-tertiary: #E8E8E8;
+  --bg-quaternary: #D9D9D9;
   
   --text-primary: #1a1a1a;
   --text-secondary: #4a4a4a;
@@ -91,6 +101,8 @@ html.light {
   
   --border-color: #D0D0D0;
   --shadow-color: rgba(0, 0, 0, 0.08);
+  --shadow-color-md: rgba(0, 0, 0, 0.12);
+  --shadow-color-lg: rgba(0, 0, 0, 0.15);
   
   --success: #10B981;
   --warning: #F59E0B;
@@ -99,7 +111,7 @@ html.light {
 }
 
 /* ============================================================================
-   ESTILOS BASE
+   ESTILOS BASE - Normalizacion y Layout
    ============================================================================ */
 
 * {
@@ -110,45 +122,74 @@ html.light {
 
 html, body {
   width: 100%;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
 }
 
 body {
-  background-color: var(--bg-primary);
-  color: var(--text-primary);
-  font-family: '"IBM Plex Sans"', system-ui, sans-serif;
+  font-family: '"IBM Plex Sans"', system-ui, -apple-system, sans-serif;
+  line-height: 1.6;
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 #root {
   width: 100%;
+  min-height: 100vh;
 }
 
 /* ============================================================================
-   CLAYMORFISMO - Componentes con sombras suaves y redondeadas
+   CLAYMORFISMO - Tarjetas y Paneles con Volumen
    ============================================================================ */
 
-.clay-card,
-.clay-panel {
+.clay-panel,
+.clay-card {
   background: var(--bg-secondary);
-  border-radius: 24px;
+  border-radius: 20px;
   padding: 24px;
-  box-shadow: 0 4px 12px var(--shadow-color);
+  border: 1px solid rgba(220, 20, 60, 0.08);
+  box-shadow: 
+    0 1px 3px var(--shadow-color),
+    0 4px 12px var(--shadow-color-md),
+    0 8px 24px rgba(0, 0, 0, 0.04);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  border: 1px solid rgba(220, 20, 60, 0.05);
+  position: relative;
+  overflow: hidden;
 }
 
-.clay-card:hover,
-.clay-panel:hover {
-  box-shadow: 0 8px 24px var(--shadow-color);
-  transform: translateY(-2px);
+.clay-panel::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(220, 20, 60, 0.02) 0%,
+    transparent 100%
+  );
+  pointer-events: none;
+}
+
+.clay-panel:hover,
+.clay-card:hover {
+  box-shadow: 
+    0 2px 4px var(--shadow-color),
+    0 8px 16px var(--shadow-color-md),
+    0 12px 32px var(--shadow-color-lg);
+  transform: translateY(-4px);
+  border-color: rgba(220, 20, 60, 0.15);
 }
 
 .clay-card-sm {
   background: var(--bg-secondary);
   border-radius: 16px;
   padding: 16px;
-  box-shadow: 0 2px 8px var(--shadow-color);
-  border: 1px solid rgba(220, 20, 60, 0.03);
+  border: 1px solid rgba(220, 20, 60, 0.06);
+  box-shadow: 
+    0 2px 8px var(--shadow-color),
+    0 4px 12px rgba(0, 0, 0, 0.02);
+  transition: all 0.3s ease;
 }
 
 .clay-button {
@@ -156,15 +197,22 @@ body {
   color: white;
   border: none;
   border-radius: 12px;
-  padding: 10px 20px;
+  padding: 12px 24px;
   font-weight: 600;
+  font-size: 0.95rem;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(220, 20, 60, 0.3);
+  box-shadow: 
+    0 4px 12px rgba(220, 20, 60, 0.3),
+    0 8px 24px rgba(220, 20, 60, 0.15);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
 }
 
 .clay-button:hover {
-  box-shadow: 0 8px 20px rgba(220, 20, 60, 0.4);
+  box-shadow: 
+    0 6px 16px rgba(220, 20, 60, 0.4),
+    0 12px 32px rgba(220, 20, 60, 0.25);
   transform: translateY(-2px);
 }
 
@@ -175,44 +223,65 @@ body {
 .clay-button-secondary {
   background: var(--bg-tertiary);
   color: var(--text-primary);
-  border: 1px solid var(--border-color);
+  border: 1.5px solid var(--border-color);
+  box-shadow: 0 2px 8px var(--shadow-color);
+}
+
+.clay-button-secondary:hover {
+  background: var(--bg-quaternary);
+  border-color: rgba(220, 20, 60, 0.3);
 }
 
 /* ============================================================================
-   GLASSMORFISMO - Paneles transparentes con fondo borroso
+   GLASSMORFISMO - Paneles Traslúcidos
    ============================================================================ */
 
 .glass-panel {
-  background: rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.75);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1.5px solid rgba(255, 255, 255, 0.3);
   border-radius: 20px;
   padding: 20px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  box-shadow: 
+    0 4px 12px rgba(0, 0, 0, 0.06),
+    0 8px 24px rgba(0, 0, 0, 0.08);
   transition: all 0.3s ease;
+  position: relative;
 }
 
-.dark .glass-panel {
-  background: rgba(15, 23, 42, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+html.dark .glass-panel {
+  background: rgba(15, 23, 42, 0.65);
+  border: 1.5px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 
+    0 4px 12px rgba(0, 0, 0, 0.25),
+    0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+.glass-panel:hover {
+  background: rgba(255, 255, 255, 0.85);
+  border-color: rgba(220, 20, 60, 0.2);
+}
+
+html.dark .glass-panel:hover {
+  background: rgba(15, 23, 42, 0.75);
+  border-color: rgba(220, 20, 60, 0.3);
 }
 
 .glass-panel-sm {
-  background: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.6);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.25);
   border-radius: 16px;
-  padding: 12px;
+  padding: 12px 16px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  transition: all 0.2s ease;
 }
 
-.dark .glass-panel-sm {
-  background: rgba(15, 23, 42, 0.5);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+html.dark .glass-panel-sm {
+  background: rgba(15, 23, 42, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 /* ============================================================================
@@ -225,14 +294,25 @@ body {
   align-items: center;
   cursor: pointer;
   user-select: none;
-  padding: 12px;
-  border-radius: 12px;
-  background: linear-gradient(135deg, rgba(220, 20, 60, 0.1) 0%, rgba(255, 107, 53, 0.05) 100%);
-  transition: all 0.3s ease;
+  padding: 16px;
+  border-radius: 14px;
+  background: linear-gradient(
+    135deg,
+    rgba(220, 20, 60, 0.12) 0%,
+    rgba(255, 107, 53, 0.06) 100%
+  );
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  font-weight: 600;
+  color: var(--text-primary);
 }
 
 .collapsible-header:hover {
-  background: linear-gradient(135deg, rgba(220, 20, 60, 0.15) 0%, rgba(255, 107, 53, 0.1) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(220, 20, 60, 0.18) 0%,
+    rgba(255, 107, 53, 0.12) 100%
+  );
+  padding-left: 20px;
 }
 
 .collapsible-title {
@@ -241,7 +321,8 @@ body {
   color: var(--text-primary);
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
+  letter-spacing: 0.3px;
 }
 
 .collapsible-toggle {
@@ -250,8 +331,9 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: transform 0.3s ease;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   color: var(--accent-red);
+  flex-shrink: 0;
 }
 
 .collapsible-toggle.open {
@@ -259,20 +341,25 @@ body {
 }
 
 .collapsible-content {
-  max-height: 1000px;
+  max-height: 2000px;
   overflow: hidden;
-  transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+  transition: 
+    max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.3s ease,
+    margin-top 0.3s ease;
   opacity: 1;
+  margin-top: 12px;
 }
 
 .collapsible-content.collapsed {
   max-height: 0;
   opacity: 0;
   overflow: hidden;
+  margin-top: 0;
 }
 
 /* ============================================================================
-   PALETA DE COLORES UNIVERSIDAD
+   PALETA DE COLORES UNIVERSIDAD DE LOS LLANOS
    ============================================================================ */
 
 .llanos-red-bg {
@@ -301,7 +388,12 @@ body {
   color: #1a1a1a;
 }
 
-/* Gradientes con colores de la universidad */
+.llanos-light {
+  background-color: #F5F5F5;
+  color: #1a1a1a;
+}
+
+/* Gradientes Universidad */
 .gradient-llanos {
   background: linear-gradient(135deg, #DC143C 0%, #FF6B35 100%);
 }
@@ -311,7 +403,11 @@ body {
 }
 
 .gradient-llanos-light {
-  background: linear-gradient(135deg, rgba(220, 20, 60, 0.1) 0%, rgba(255, 107, 53, 0.05) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(220, 20, 60, 0.12) 0%,
+    rgba(255, 107, 53, 0.06) 100%
+  );
 }
 
 /* ============================================================================
@@ -319,33 +415,40 @@ body {
    ============================================================================ */
 
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
 }
 
 ::-webkit-scrollbar-track {
   background: var(--bg-tertiary);
-  border-radius: 4px;
+  border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb {
   background: linear-gradient(135deg, #DC143C 0%, #FF6B35 100%);
-  border-radius: 4px;
+  border-radius: 10px;
   transition: background 0.3s ease;
+  border: 2px solid var(--bg-tertiary);
 }
 
 ::-webkit-scrollbar-thumb:hover {
   background: linear-gradient(135deg, #FF6B35 0%, #DC143C 100%);
 }
 
+/* Firefox Scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(220, 20, 60, 0.6) var(--bg-tertiary);
+}
+
 /* ============================================================================
-   ANIMACIONES
+   ANIMACIONES Y TRANSICIONES
    ============================================================================ */
 
 @keyframes slideDown {
   from {
     opacity: 0;
-    transform: translateY(-10px);
+    transform: translateY(-15px);
   }
   to {
     opacity: 1;
@@ -360,7 +463,16 @@ body {
   }
   to {
     opacity: 0;
-    transform: translateY(-10px);
+    transform: translateY(-15px);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 }
 
@@ -369,40 +481,53 @@ body {
     box-shadow: 0 0 0 0 rgba(220, 20, 60, 0.7);
   }
   50% {
-    box-shadow: 0 0 0 10px rgba(220, 20, 60, 0);
+    box-shadow: 0 0 0 12px rgba(220, 20, 60, 0);
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-8px);
   }
 }
 
 .animate-slide-down {
-  animation: slideDown 0.3s ease;
+  animation: slideDown 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .animate-slide-up {
   animation: slideUp 0.3s ease;
 }
 
+.animate-fade-in {
+  animation: fadeIn 0.3s ease;
+}
+
 .animate-pulse-red {
   animation: pulse-red 2s infinite;
 }
 
-/* ============================================================================
-   UTILIDADES ADICIONALES
-   ============================================================================ */
-
-.transition-smooth {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+.animate-float {
+  animation: float 3s ease-in-out infinite;
 }
 
+/* ============================================================================
+   SOMBRAS CLAYMORFISMO
+   ============================================================================ */
+
 .shadow-clay-sm {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 12px var(--shadow-color);
 }
 
 .shadow-clay-md {
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 8px 24px var(--shadow-color-md);
 }
 
 .shadow-clay-lg {
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 12px 32px var(--shadow-color-lg);
 }
 
 .shadow-glass-sm {
@@ -417,9 +542,20 @@ body {
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
 }
 
-/* Bordes redondeados claymorfismo */
+/* ============================================================================
+   BORDES Y ESQUINAS
+   ============================================================================ */
+
 .rounded-clay {
   border-radius: 24px;
+}
+
+.rounded-clay-lg {
+  border-radius: 28px;
+}
+
+.rounded-clay-md {
+  border-radius: 20px;
 }
 
 .rounded-clay-sm {
@@ -428,4 +564,73 @@ body {
 
 .rounded-clay-xs {
   border-radius: 12px;
+}
+
+/* ============================================================================
+   UTILIDADES ADICIONALES
+   ============================================================================ */
+
+.transition-smooth {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.backdrop-blur-sm {
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.backdrop-blur-md {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.backdrop-blur-lg {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* Efecto de elevación */
+.elevated {
+  position: relative;
+  z-index: 1;
+}
+
+.elevated::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--shadow-color-lg);
+  border-radius: inherit;
+  z-index: -1;
+  blur: 20px;
+}
+
+/* ============================================================================
+   RESPONSIVE Y MEDIA QUERIES
+   ============================================================================ */
+
+@media (max-width: 768px) {
+  .clay-panel,
+  .clay-card {
+    padding: 16px;
+    border-radius: 16px;
+  }
+
+  .collapsible-header {
+    padding: 12px;
+    font-size: 0.95rem;
+  }
+
+  .glass-panel {
+    padding: 16px;
+    border-radius: 16px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
