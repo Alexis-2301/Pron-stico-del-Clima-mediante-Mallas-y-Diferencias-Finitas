@@ -1,10 +1,11 @@
-# Python
+# Git ignore - Pronóstico Meteorológico
+
+# Entornos Python
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
 .Python
-env/
 build/
 develop-eggs/
 dist/
@@ -20,20 +21,128 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
-.pytest_cache/
-.coverage
-htmlcov/
+MANIFEST
+venv/
+ENV/
+env/
 
-# Node / Frontend
-node_modules/
-frontend/node_modules/
-frontend/dist/
-.npm
-.eslintcache
-*.local
-
-# IDEs & OS
+# IDE
 .vscode/
 .idea/
+*.swp
+*.swo
+*~
+.DS_Store
+*.sublime-workspace
+*.sublime-project
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+dist/
+.env.local
+.env.*.local
+
+# Testing
+.pytest_cache/
+htmlcov/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+
+# Documentación generada
+docs/_build/
+site/
+
+# Archivos de sistema
 .DS_Store
 Thumbs.db
+*.log
+
+# Docker
+.dockerignore
+docker-compose.override.yml
+
+# Entorno local
+.env
+.env.*.local
+.env.production.local
+.env.development.local
+
+# Archivos temporales
+*.tmp
+*.temp
+*.bak
+*.swp
+
+# Build artifacts
+*.o
+*.a
+*.so
+*.dylib
+*.dll
+*.exe
+
+# Redis
+dump.rdb
+appendonly.aof
+
+# Archivos de datos meteorológicos grandes
+*.nc
+*.grib
+*.grib2
+*.netcdf
+
+# Caché
+.cache/
+*.cache
+
+# Análisis estático
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pyre/
+.pylint.d/
+
+# Resultado de pruebas
+test-results/
+coverage-report/
+
+# Archivos de configuración sensible
+secrets/
+.secrets/
+*.pem
+*.key
+*.pfx
+*.p12
+
+# Compilados
+*.pyc
+*.pyo
+
+# IDE específicos
+.vscode/*
+!.vscode/settings.json
+!.vscode/launch.json
+.vscode/tasks.json
+
+# Jupyter Notebook
+.ipynb_checkpoints
+*.ipynb
+
+# Machine learning models
+*.pkl
+*.joblib
+models/
+
+# Archivos temporales de compilación
+*.o
+*.so
+*.a

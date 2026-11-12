@@ -1,0 +1,75 @@
+services:
+  # Base de datos Redis para caché
+  redis:
+    image: redis:7-alpine
+    container_name: clima_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - clima_network
+
+  # Backend FastAPI
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: clima_backend
+    ports:
+      - "8000:8000"
+    environment:
+      PYTHONUNBUFFERED: "1"
+      DATABASE_URL: "redis://redis:6379"
+      OPENWEATHER_API_KEY: "${OPENWEATHER_API_KEY:-demo}"
+      AEMET_API_KEY: "${AEMET_API_KEY:-demo}"
+      NOAA_API_KEY: "${NOAA_API_KEY:-demo}"
+      LOG_LEVEL: "DEBUG"
+    depends_on:
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app/backend
+    networks:
+      - clima_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # Frontend React/Vite
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: clima_frontend
+    ports:
+      - "3000:80"
+    environment:
+      VITE_API_URL: "http://backend:8000"
+      VITE_API_TIMEOUT: "30000"
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend/src:/app/src
+    networks:
+      - clima_network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+volumes:
+  redis_data:
+
+networks:
+  clima_network:
+    driver: bridge
