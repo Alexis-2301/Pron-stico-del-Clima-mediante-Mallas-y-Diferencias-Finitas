@@ -1,32 +1,435 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* index.css - Estilos Globales con Claymorfismo, Glassmorfismo y Tema Universidad */
+
+/* ============================================================================
+   SISTEMA DE TEMAS (Claro/Oscuro)
+   ============================================================================ */
 
 :root {
-  color-scheme: dark;
+  /* Modo Claro (Universidad de los Llanos) */
+  --bg-primary: #F5F5F5;
+  --bg-secondary: #FFFFFF;
+  --bg-tertiary: #E8E8E8;
+  
+  --text-primary: #1a1a1a;
+  --text-secondary: #4a4a4a;
+  --text-tertiary: #6a6a6a;
+  
+  --accent-red: #DC143C;
+  --accent-red-light: #FF6B35;
+  --accent-red-dark: #8B0000;
+  
+  --border-color: #D0D0D0;
+  --shadow-color: rgba(0, 0, 0, 0.08);
+  
+  /* Colores funcionales - Modo claro */
+  --success: #10B981;
+  --warning: #F59E0B;
+  --error: #EF4444;
+  --info: #3B82F6;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Modo Oscuro (Actual) */
+    --bg-primary: #030712;
+    --bg-secondary: #0f172a;
+    --bg-tertiary: #1e293b;
+    
+    --text-primary: #f1f5f9;
+    --text-secondary: #cbd5e1;
+    --text-tertiary: #94a3b8;
+    
+    --accent-red: #DC143C;
+    --accent-red-light: #FF6B35;
+    --accent-red-dark: #A01030;
+    
+    --border-color: #475569;
+    --shadow-color: rgba(0, 0, 0, 0.3);
+    
+    /* Colores funcionales - Modo oscuro */
+    --success: #34D399;
+    --warning: #FBBF24;
+    --error: #F87171;
+    --info: #60A5FA;
+  }
+}
+
+html.dark {
+  --bg-primary: #030712;
+  --bg-secondary: #0f172a;
+  --bg-tertiary: #1e293b;
+  
+  --text-primary: #f1f5f9;
+  --text-secondary: #cbd5e1;
+  --text-tertiary: #94a3b8;
+  
+  --accent-red: #DC143C;
+  --accent-red-light: #FF6B35;
+  --accent-red-dark: #A01030;
+  
+  --border-color: #475569;
+  --shadow-color: rgba(0, 0, 0, 0.3);
+  
+  --success: #34D399;
+  --warning: #FBBF24;
+  --error: #F87171;
+  --info: #60A5FA;
+}
+
+html.light {
+  --bg-primary: #F5F5F5;
+  --bg-secondary: #FFFFFF;
+  --bg-tertiary: #E8E8E8;
+  
+  --text-primary: #1a1a1a;
+  --text-secondary: #4a4a4a;
+  --text-tertiary: #6a6a6a;
+  
+  --accent-red: #DC143C;
+  --accent-red-light: #FF6B35;
+  --accent-red-dark: #8B0000;
+  
+  --border-color: #D0D0D0;
+  --shadow-color: rgba(0, 0, 0, 0.08);
+  
+  --success: #10B981;
+  --warning: #F59E0B;
+  --error: #EF4444;
+  --info: #3B82F6;
+}
+
+/* ============================================================================
+   ESTILOS BASE
+   ============================================================================ */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
 }
 
 body {
-  margin: 0;
-  padding: 0;
-  background-color: #030712;
-  color: #f1f5f9;
-  font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  overflow-x: hidden;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: '"IBM Plex Sans"', system-ui, sans-serif;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  overflow: hidden;
 }
 
-/* Custom scrollbars */
+#root {
+  height: 100%;
+  width: 100%;
+}
+
+/* ============================================================================
+   CLAYMORFISMO - Componentes con sombras suaves y redondeadas
+   ============================================================================ */
+
+.clay-card,
+.clay-panel {
+  background: var(--bg-secondary);
+  border-radius: 24px;
+  padding: 24px;
+  box-shadow: 0 4px 12px var(--shadow-color);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid rgba(220, 20, 60, 0.05);
+}
+
+.clay-card:hover,
+.clay-panel:hover {
+  box-shadow: 0 8px 24px var(--shadow-color);
+  transform: translateY(-2px);
+}
+
+.clay-card-sm {
+  background: var(--bg-secondary);
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 2px 8px var(--shadow-color);
+  border: 1px solid rgba(220, 20, 60, 0.03);
+}
+
+.clay-button {
+  background: linear-gradient(135deg, var(--accent-red) 0%, var(--accent-red-light) 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 10px 20px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(220, 20, 60, 0.3);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.clay-button:hover {
+  box-shadow: 0 8px 20px rgba(220, 20, 60, 0.4);
+  transform: translateY(-2px);
+}
+
+.clay-button:active {
+  transform: translateY(0);
+}
+
+.clay-button-secondary {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+}
+
+/* ============================================================================
+   GLASSMORFISMO - Paneles transparentes con fondo borroso
+   ============================================================================ */
+
+.glass-panel {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+}
+
+.dark .glass-panel {
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+}
+
+.glass-panel-sm {
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 16px;
+  padding: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.dark .glass-panel-sm {
+  background: rgba(15, 23, 42, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+/* ============================================================================
+   COMPONENTES COLLAPSIBLE (RETRAÍBLES)
+   ============================================================================ */
+
+.collapsible-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+  padding: 12px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(220, 20, 60, 0.1) 0%, rgba(255, 107, 53, 0.05) 100%);
+  transition: all 0.3s ease;
+}
+
+.collapsible-header:hover {
+  background: linear-gradient(135deg, rgba(220, 20, 60, 0.15) 0%, rgba(255, 107, 53, 0.1) 100%);
+}
+
+.collapsible-title {
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.collapsible-toggle {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.3s ease;
+  color: var(--accent-red);
+}
+
+.collapsible-toggle.open {
+  transform: rotate(180deg);
+}
+
+.collapsible-content {
+  max-height: 1000px;
+  overflow: hidden;
+  transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+  opacity: 1;
+}
+
+.collapsible-content.collapsed {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+}
+
+/* ============================================================================
+   PALETA DE COLORES UNIVERSIDAD
+   ============================================================================ */
+
+.llanos-red-bg {
+  background-color: #DC143C;
+}
+
+.llanos-red-text {
+  color: #DC143C;
+}
+
+.llanos-accent-red-bg {
+  background-color: #FF6B35;
+}
+
+.llanos-accent-red-text {
+  color: #FF6B35;
+}
+
+.llanos-dark-bg {
+  background-color: #1a1a1a;
+  color: #F5F5F5;
+}
+
+.llanos-light-bg {
+  background-color: #F5F5F5;
+  color: #1a1a1a;
+}
+
+/* Gradientes con colores de la universidad */
+.gradient-llanos {
+  background: linear-gradient(135deg, #DC143C 0%, #FF6B35 100%);
+}
+
+.gradient-llanos-reverse {
+  background: linear-gradient(135deg, #FF6B35 0%, #DC143C 100%);
+}
+
+.gradient-llanos-light {
+  background: linear-gradient(135deg, rgba(220, 20, 60, 0.1) 0%, rgba(255, 107, 53, 0.05) 100%);
+}
+
+/* ============================================================================
+   SCROLLBAR PERSONALIZADO
+   ============================================================================ */
+
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
 }
+
 ::-webkit-scrollbar-track {
-  background: #0b0f19;
+  background: var(--bg-tertiary);
+  border-radius: 4px;
 }
+
 ::-webkit-scrollbar-thumb {
-  background: #1e293b;
-  border-radius: 3px;
+  background: linear-gradient(135deg, #DC143C 0%, #FF6B35 100%);
+  border-radius: 4px;
+  transition: background 0.3s ease;
 }
+
 ::-webkit-scrollbar-thumb:hover {
-  background: #334155;
+  background: linear-gradient(135deg, #FF6B35 0%, #DC143C 100%);
+}
+
+/* ============================================================================
+   ANIMACIONES
+   ============================================================================ */
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes pulse-red {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(220, 20, 60, 0.7);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgba(220, 20, 60, 0);
+  }
+}
+
+.animate-slide-down {
+  animation: slideDown 0.3s ease;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.3s ease;
+}
+
+.animate-pulse-red {
+  animation: pulse-red 2s infinite;
+}
+
+/* ============================================================================
+   UTILIDADES ADICIONALES
+   ============================================================================ */
+
+.transition-smooth {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.shadow-clay-sm {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.shadow-clay-md {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.shadow-clay-lg {
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
+}
+
+.shadow-glass-sm {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.shadow-glass-md {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.shadow-glass-lg {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+/* Bordes redondeados claymorfismo */
+.rounded-clay {
+  border-radius: 24px;
+}
+
+.rounded-clay-sm {
+  border-radius: 16px;
+}
+
+.rounded-clay-xs {
+  border-radius: 12px;
 }
